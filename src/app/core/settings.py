@@ -20,12 +20,16 @@ class PasswordSettings(BaseModel):
 class VerifyCodeSettings(BaseModel):
     interval: int
 
+class FileSettings(BaseModel):
+    image_formats: list[str]
+
 class Settings(BaseSettings):
     db: DBSettings
     redis: RedisSettings
     jwt: JWTSettings
     password: PasswordSettings
     verify_code: VerifyCodeSettings
+    file: FileSettings
     
     model_config = SettingsConfigDict(env_file="settings.env", env_nested_delimiter="__")
     

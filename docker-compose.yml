@@ -12,13 +12,32 @@ services:
       - "5432:5432"
 
     volumes:
-      - .pgdata:/var/lib/postgresql/data/pgdata
+      - pgdata:/var/lib/postgresql/data/pgdata
     
-  redid:
+  redis:
     image: redis:alpine
 
     ports:
       - "6379:6379"
 
     volumes:
-      - .redisdata:/data
+      - redisdata:/data
+
+  s3:
+    image: quay.io/minio/minio
+
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - data-minio:/data
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: 12345678
+
+    command: server --console-address ":9001" /data
+
+volumes:
+  redisdata:
+  data-minio:
+  pgdata:

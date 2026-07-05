@@ -1,5 +1,5 @@
 
-from src.app.crud.facroty import FactoryCRUD
+from src.app.crud.base import FactoryCRUD
 from src.app.models.user import User
 
 class UserCrud(FactoryCRUD):

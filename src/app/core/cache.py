@@ -7,7 +7,7 @@ class Cache:
         self.pool = ConnectionPool.from_url(url)
 
     async def get_redis(self):
-        redis = Redis.from_url(pool=self.pool)
+        redis = Redis(pool=self.pool)
         yield redis
         await redis.aclose()
 

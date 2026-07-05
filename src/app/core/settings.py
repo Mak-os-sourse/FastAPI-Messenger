@@ -23,6 +23,10 @@ class VerifyCodeSettings(BaseModel):
 class FileSettings(BaseModel):
     image_formats: list[str]
 
+class S3Settings(BaseModel):
+    url: str
+    bucket_user: str
+
 class Settings(BaseSettings):
     db: DBSettings
     redis: RedisSettings
@@ -30,6 +34,7 @@ class Settings(BaseSettings):
     password: PasswordSettings
     verify_code: VerifyCodeSettings
     file: FileSettings
+    s3: S3Settings
     
     model_config = SettingsConfigDict(env_file="settings.env", env_nested_delimiter="__")
     

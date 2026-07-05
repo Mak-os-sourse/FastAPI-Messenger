@@ -27,7 +27,7 @@ async def update_data(
     data = update_data.model_dump(exclude_none=True)
     user = await user_crud.update(session, id=user.id, **data)
     return UserResponse(**user.model_dump())
-
+    
 @router.put("/avatar/update")
 async def update_avatar(
     user: User = Depends(auth_user),

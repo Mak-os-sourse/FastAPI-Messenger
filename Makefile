@@ -1,2 +1,3 @@
 docker:
-	docker-compose up -d
+	sudo systemctl start docker
+	sudo docker-compose up -d

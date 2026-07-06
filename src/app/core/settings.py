@@ -25,6 +25,8 @@ class FileSettings(BaseModel):
 
 class S3Settings(BaseModel):
     url: str
+    user: str
+    password: str
     bucket_user: str
 
 class Settings(BaseSettings):

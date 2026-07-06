@@ -1,10 +1,9 @@
-import ffmpeg
+from ffmpeg.asyncio import FFmpeg
 from io import BytesIO
-from enum import StrEnum
 
 from src.app.exc.ffmpeg_tools import FFmpegToolException
 
-class FormatFile(StrEnum):
+class FormatFile:
     png: str = "image2pipe"
     jpeg: str = "image2pipe"
     webp: str = "webp"
@@ -15,22 +14,25 @@ class FormatFile(StrEnum):
     mp3: str = "mp3"
 
 class FFmpegTools:
-    def convert(
+    async def convert(
         self, file: str | BytesIO | bytes, 
         output_format: str,
     ) -> bytes:
         input_file = self._get_data_file(file)       
-        stream = ffmpeg.input("pipe:")
-        stream = ffmpeg.output(stream, "pipe:", format=output_format)
-        process = ffmpeg.run_async(stream, pipe_stdin=True, pipe_stdout=True)
+        ffmpeg = (
+            FFmpeg().input("pipe:0")
+            .output("pipe:1", format=output_format)
+        )
         
-        out, _ = process.communicate(input=input_file)
+        # out, _ = process.communicate(input=input_file)
         
-        if not out:
-            raise FFmpegToolException()
+        # if not out:
+        #     raise FFmpegToolException()
         
-        output = BytesIO(out)
-        return output.getvalue()
+        await ffmpeg.execute(input_file)
+        
+        # output = BytesIO(out)
+        # return output.getvalue()
         
     def _get_data_file(self, file: str | BytesIO | bytes) -> bytes:
         if isinstance(file, BytesIO):

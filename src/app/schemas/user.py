@@ -1,3 +1,4 @@
+from typing import Literal
 from pydantic import BaseModel, Field, EmailStr
 
 class User(BaseModel):
@@ -14,3 +15,14 @@ class UserResponse(BaseModel):
     email: EmailStr
     description: str = Field(max_length=50)
     create_at: int
+
+class UpdateData(BaseModel):
+    name: str = Field(default=None, min_length=4, max_length=15)
+    description: str = Field(default=None, max_length=50)
+
+class Enable2FA(BaseModel):
+    type: Literal["email", "totp"]
+
+class Enable2FAResponse(BaseModel):
+    type: Literal["email", "totp"] | None
+    enable_2fa: bool | None

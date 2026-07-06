@@ -6,7 +6,7 @@ from src.app.core.base import TModel
 class BaseCRUD:
     def __init__(self, model: TModel):
         self.model = model
-        self.model_keys = model.__dict__
+        self.model_keys = model.__dict__.keys()
     
     async def add(self, session: AsyncSession, **values) -> TModel:
         stmt = insert(self.model).values(**values).returning(self.model)
@@ -43,5 +43,7 @@ class BaseCRUD:
             if key in self.model_keys:
                 exp = getattr(self.model, key)
                 where.append(exp == value)
+            else:
+                raise ValueError("Key required element in Model")
         return where
                 

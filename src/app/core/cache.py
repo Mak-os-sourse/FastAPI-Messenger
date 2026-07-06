@@ -1,14 +1,17 @@
 from redis.asyncio import Redis, ConnectionPool
 
-from src.app.core.settings import settings
-
 class Cache:
-    def __init__(self, url: str):
+    def init(self, url: str):
         self.pool = ConnectionPool.from_url(url)
-
+    
+    async def close(self):
+        self.pool.aclose()
+    
     async def get_redis(self):
-        redis = Redis(pool=self.pool)
-        yield redis
-        await redis.aclose()
+        async with Redis(pool=self.pool) as redis:
+            try:
+                yield redis
+            except Exception as e:
+                raise e
 
-cache = Cache(settings.redis.url)
+cache = Cache()

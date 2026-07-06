@@ -1,11 +1,10 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import Pool
 
-from src.app.core.settings import settings
 from src.app.core.base import Base
 
 class DB:
-    def __init__(self, url: str, pool: Pool = None):
+    def init(self, url: str, pool: Pool = None):
         self.engine = create_async_engine(url, pool=pool)
         self.sessionmaker = async_sessionmaker(self.engine)
     
@@ -26,4 +25,4 @@ class DB:
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
 
-db = DB(settings.db.url)
+db = DB()

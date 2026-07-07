@@ -1,12 +1,15 @@
-from fastapi import APIRouter, Depends, Body, UploadFile
+from fastapi import APIRouter, Depends, Body, Query, UploadFile, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.app.aws import S3Storage, get_storage
+from src.app.tasks.file import save_convert
+from src.app.core.settings import settings
 from src.app.deps.file import get_image
 from src.app.deps.auth import auth_user
 from src.app.crud.user import user_crud
+from src.app.schemas.base import Success
 from src.app.schemas.user import (
     UserResponse, Enable2FA,
-    Enable2FAResponse,
     UpdateData,
 )
 from src.app.models.user import User
@@ -27,27 +30,44 @@ async def update_data(
     data = update_data.model_dump(exclude_none=True)
     user = await user_crud.update(session, id=user.id, **data)
     return UserResponse(**user.model_dump())
-    
-@router.put("/avatar/update")
+
+@router.get("/avatar/get")
+async def get_avatar(
+    id: str = Query(),
+    storage: S3Storage = Depends(get_storage),
+):
+    format = settings.file.base_image_format
+    image = await storage.get(
+        bucket=settings.s3.user_bucket,
+        key=f"avatar-{id}.{format}",
+    )
+    return Response(image, media_type=f"image/{format}")
+
+@router.put("/avatar/update", response_model=Success)
 async def update_avatar(
     user: User = Depends(auth_user),
     image: UploadFile = Depends(get_image),
 ):
-    ...
+    format = settings.file.base_image_format
+    await save_convert(
+        image, bucket=settings.s3.user_bucket,
+        key=f"avatar-{user.id}.{format}"
+    ).kiq()
+    return Success(True)
 
-@router.post("/2fa/enable", response_model=Enable2FAResponse)
+@router.post("/2fa/enable", response_model=Success)
 async def enable_2fa(
     enable_2fa: Enable2FA = Body(),
     user: User = Depends(auth_user),
     session: AsyncSession = Depends(db.get_session),
 ):
     await user_crud.update(session, id=user.id, type_2fa=enable_2fa.type)
-    return Enable2FAResponse(enable_2fa=True, type=enable_2fa.type)
+    return Success(True)
 
-@router.post("/2fa/disable", response_model=Enable2FAResponse)
+@router.post("/2fa/disable", response_model=Success)
 async def enable_2fa(
     user: User = Depends(auth_user),
     session: AsyncSession = Depends(db.get_session),
 ):
     await user_crud.update(session, id=user.id, type_2fa=None)
-    return Enable2FAResponse(enable_2fa=False, type=None)
+    return Success(True)

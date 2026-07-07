@@ -1,8 +1,8 @@
 
-from src.app.crud.base import FactoryCRUD
+from src.app.crud.base import BaseCRUD
 from src.app.models.user import User
 
-class UserCrud(FactoryCRUD):
+class UserCrud(BaseCRUD):
     def __init__(self):
         super().__init__(User)
         

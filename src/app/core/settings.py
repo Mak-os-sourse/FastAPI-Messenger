@@ -22,12 +22,13 @@ class VerifyCodeSettings(BaseModel):
 
 class FileSettings(BaseModel):
     image_formats: list[str]
+    base_image_format: str
 
 class S3Settings(BaseModel):
     url: str
     user: str
     password: str
-    bucket_user: str
+    user_bucket: str
 
 class Settings(BaseSettings):
     db: DBSettings

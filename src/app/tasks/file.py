@@ -16,5 +16,5 @@ async def save_convert(
     format = getattr(FormatFile, format_file, None)
     if format is None:
         raise # bla bla bla
-    data = ffmpeg_tools.convert(file=file, output_format=format)
+    data = await ffmpeg_tools.convert(file=file, output_format=format)
     await storage.upload(bucket=bucket, key=key, file=data)

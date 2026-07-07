@@ -22,7 +22,3 @@ class UpdateData(BaseModel):
 
 class Enable2FA(BaseModel):
     type: Literal["email", "totp"]
-
-class Enable2FAResponse(BaseModel):
-    type: Literal["email", "totp"] | None
-    enable_2fa: bool | None

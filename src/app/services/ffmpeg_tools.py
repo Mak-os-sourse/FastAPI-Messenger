@@ -1,4 +1,4 @@
-from ffmpeg.asyncio import FFmpeg
+import ffmpeg, asyncio
 from io import BytesIO
 
 from src.app.exc.ffmpeg_tools import FFmpegToolException
@@ -18,21 +18,18 @@ class FFmpegTools:
         self, file: str | BytesIO | bytes, 
         output_format: str,
     ) -> bytes:
-        input_file = self._get_data_file(file)       
-        ffmpeg = (
-            FFmpeg().input("pipe:0")
-            .output("pipe:1", format=output_format)
-        )
+        input_file = self._get_data_file(file)
+        stream = ffmpeg.input("pipe:")
+        stream = ffmpeg.output(stream, "pipe:", format=output_format)
+        process = ffmpeg.run_async(stream, pipe_stdin=True, pipe_stdout=True)
         
-        # out, _ = process.communicate(input=input_file)
+        out, _ = await asyncio.to_thread(process.communicate, input=input_file)
         
-        # if not out:
-        #     raise FFmpegToolException()
+        if process.returncode != 0 and not out:
+            raise FFmpegToolException()
         
-        await ffmpeg.execute(input_file)
-        
-        # output = BytesIO(out)
-        # return output.getvalue()
+        output = BytesIO(out)
+        return output.getvalue()
         
     def _get_data_file(self, file: str | BytesIO | bytes) -> bytes:
         if isinstance(file, BytesIO):

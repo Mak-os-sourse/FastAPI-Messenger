@@ -97,10 +97,10 @@ async def login_user(
         if user.type_2fa is not None:
             return LoginUserResponse(user_id=user.id, type_2fa=user.type_2fa)
         else:                
-            refresh, access = token.create_tokens(username=user_data.username, email=user_data.email)
+            refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
             response.set_cookie("token", refresh, httponly=True)
             
-            return LoginUserResponse(access=access, user_id=user.id)
+            return LoginUserResponse(user_id=user.id, access_token=access, enable_2fa=False)
     
 @router.post("/verify-code/gen", response_model=VerifyCodeResponse)
 async def gen_code(

@@ -8,7 +8,7 @@ class Hash:
         return hashlib.sha256(string.encode()).hexdigest()
     
     def verify(self, data: str, hash: str) -> bool:
-        string = self.hashpw(data)
+        string = self.hash(data)
         return string == hash
     
 hash_lib = Hash()

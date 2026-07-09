@@ -17,8 +17,8 @@ class LoginUser(BaseModel):
     
 class LoginUserResponse(BaseModel):
     user_id: int
-    access_token: str = None
-    enable_2fa: bool = True
+    access_token: str | None = None
+    type_2fa: str | None = None
 
 class VerifyCodeResponse(BaseModel):
     send_code: bool

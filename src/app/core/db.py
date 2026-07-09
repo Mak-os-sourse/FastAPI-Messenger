@@ -4,6 +4,10 @@ from sqlalchemy import Pool
 from src.app.core.base import Base
 
 class DB:
+    def __init__(self):
+        self.engine = None
+        self.sessionmaker = None
+    
     def init(self, url: str, pool: Pool = None):
         self.engine = create_async_engine(url, pool=pool)
         self.sessionmaker = async_sessionmaker(self.engine)

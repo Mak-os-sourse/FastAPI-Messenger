@@ -100,7 +100,7 @@ async def login_user(
             refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
             response.set_cookie("token", refresh, httponly=True)
             
-            return LoginUserResponse(user_id=user.id, access_token=access, enable_2fa=False)
+            return LoginUserResponse(user_id=user.id, access_token=access, type_2fa=None)
     
 @router.post("/verify-code/gen", response_model=VerifyCodeResponse)
 async def gen_code(
@@ -111,7 +111,7 @@ async def gen_code(
         code = random.randint(100000, 999999)
         key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
         
-        if await redis.get(key) is None:
+        if (await redis.get(key)) is None:
             await redis.set(key, code)
             # email.send bla bla bla
             return VerifyCodeResponse(send_code=True)
@@ -125,8 +125,9 @@ async def code_verify(
 ):
     key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
     code = await redis.get(key)
-    if code == verify_code.code:
-        refresh, access = token.create_tokens(username=user.username, email=user.email)
+    print(code, key, user.name)
+    if int(code) == verify_code.code:
+        refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
         response.set_cookie("token", refresh, httponly=True)
                 
         return JwtToken(access_token=access)

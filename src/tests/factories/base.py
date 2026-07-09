@@ -1,24 +1,16 @@
-from typing import Coroutine
+from factory.alchemy import SQLAlchemyModelFactory
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.core.base import TModel
-
-class BaseFactory:
-    def __init__(self, model: TModel):
-        self.model = model
+class BaseFactory(SQLAlchemyModelFactory):
+    @classmethod
+    def set_session(cls, session: AsyncSession):
+        cls._meta.sqlalchemy_session = session
     
-    def get_data(self) -> dict: ...
-    
-    async def add(self, session: AsyncSession, count: int = 1, **kargs):
-        models = []
-        for _ in range(count):
-            dict_data = self.get_data()
-            dict_data.update(**kargs)
-            for key, value in dict_data.items():
-                if isinstance(value, Coroutine):
-                    dict_data[key] = await value
-            
-            models.append(self.model(**dict_data))
-        session.add_all(models)
+    @classmethod
+    async def _create(cls, model_class, *args, **kwargs):
+        instance = super()._create(model_class, *args, **kwargs)
+        session: AsyncSession = cls._meta.sqlalchemy_session
+        if session is None:
+            raise ValueError("No session provided (use set_session).")
         await session.flush()
-        return models[0] if len(models) == 1 else models
+        return instance

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.tests.fake import fake
 from src.app.models.user import User
 from src.app.crud.user import user_crud
-from src.tests.factories.user import user_factory
+from src.tests.factories.user import UserFactory
 
 async def test_add_user(session: AsyncSession):
     user = await user_crud.add(
@@ -20,14 +20,16 @@ async def test_add_user(session: AsyncSession):
     assert result.model_dump() == user.model_dump()
     
 async def test_get_all_users(session: AsyncSession):
-    user = await user_factory.add(session)
+    UserFactory.set_session(session)
+    user = await UserFactory()
     
     result = await user_crud.get_all(session, id=user.id)
     
     assert result[0].model_dump() == user.model_dump()
 
 async def test_get_user(session: AsyncSession):
-    user = await user_factory.add(session)
+    UserFactory.set_session(session)
+    user = await UserFactory()
     
     result = await user_crud.get_one(session, id=user.id)
     
@@ -35,14 +37,16 @@ async def test_get_user(session: AsyncSession):
 
 async def test_update_user(session: AsyncSession):
     old_name = fake.name()
-    user = await user_factory.add(session)
+    UserFactory.set_session(session)
+    user = await UserFactory()
     
     result = await user_crud.update(session, id=user.id, name=fake.name())
     
     assert result.name != old_name
     
 async def test_delete_user(session: AsyncSession):
-    user = await user_factory.add(session)
+    UserFactory.set_session(session)
+    user = await UserFactory()
     
     result = await user_crud.delete(session, id=user.id)
     

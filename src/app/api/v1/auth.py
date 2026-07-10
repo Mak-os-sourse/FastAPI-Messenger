@@ -8,13 +8,20 @@ from numpy import random
 import time
 
 from src.app.services.security import token, hash_lib, totp
+from src.app.schemas.base import Success
 from src.app.schemas.auth import (
     VerifyCode, LoginUser,
     LoginUserResponse, JwtToken,
     VerifyCodeResponse, CreateUser
 )
-from src.app.exc.user import UserNotFoud, UserAlreadyExists
-from src.app.exc.auth import InvalidToken, InvalidVerifyCode
+from src.app.exc.auth import (
+    InvalidToken,
+    InvalidVerifyCode,
+    NotEnable2FA,
+    Unauthorized,
+    ErrorGenCode,
+)
+from src.app.exc.user import UserAlreadyExists
 from src.app.core.settings import settings
 from src.app.crud.user import user_crud
 from src.app.deps.user import get_user
@@ -38,28 +45,30 @@ async def update_token(
         refresh_key = f"{settings.redis.namespace}:token-blacklist:{refresh}:refresh"
         
         refresh_data = token.decode(refresh)
-        access_data = token.decode(access, verify_exp=False)
+        access_data = token.decode(access.credentials, verify_exp=False)
         
         if await redis.get(access_key) is not None:
             raise InvalidToken()
         if await redis.get(refresh_key) is not None:
-            raise InvalidToken()      
+            raise InvalidToken()
+        if not refresh_data and not access_data:
+            raise InvalidToken()  
         if refresh_data["id"] != access_data["id"]:
             raise InvalidToken()
         
-        user = await user_crud.get_one(session, username=refresh_data["id"])
+        user = await user_crud.get_one(session, id=refresh_data["id"])
         if user is None:
             raise InvalidToken()
         
-        now = time.time()
-        await redis.set(refresh_key, None, ex=refresh_data["exp"] - now)
+        now = int(time.time())
+        await redis.set(refresh_key, 1, ex=refresh_data["exp"] - now)
         
         refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
         response.set_cookie("token", refresh, httponly=True)
         
-        return JwtToken(access=access) 
+        return JwtToken(access_token=access) 
     except PyJWTError:
-        raise InvalidToken()
+        raise InvalidToken
 
 @router.post("/regist", response_model=JwtToken)
 async def regist_user(response: Response, user_data: CreateUser = Body(), session: AsyncSession = Depends(db.get_session)):
@@ -91,7 +100,7 @@ async def login_user(
 ):
     user = await user_crud.get_one(session, username=user_data.username)
     if user is None:
-        raise UserNotFoud()
+        raise Unauthorized()
     
     if hash_lib.verify(user_data.password, user.password):
         if user.type_2fa is not None:
@@ -101,13 +110,15 @@ async def login_user(
             response.set_cookie("token", refresh, httponly=True)
             
             return LoginUserResponse(user_id=user.id, access_token=access, type_2fa=None)
+    else:
+        raise Unauthorized
     
 @router.post("/verify-code/gen", response_model=VerifyCodeResponse)
 async def gen_code(
     user: User = Depends(get_user),
     redis: Redis = Depends(cache.get_redis),
 ):
-    for _ in range(100):
+    for _ in range(1000):
         code = random.randint(100000, 999999)
         key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
         
@@ -115,6 +126,7 @@ async def gen_code(
             await redis.set(key, code)
             # email.send bla bla bla
             return VerifyCodeResponse(send_code=True)
+    raise ErrorGenCode()
 
 @router.post("/verify-code/verify", response_model=JwtToken)
 async def code_verify(
@@ -125,7 +137,7 @@ async def code_verify(
 ):
     key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
     code = await redis.get(key)
-    print(code, key, user.name)
+
     if int(code) == verify_code.code:
         refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
         response.set_cookie("token", refresh, httponly=True)
@@ -138,24 +150,27 @@ async def code_verify(
 async def gen_qrcode(
     user: User = Depends(get_user),
 ):
-    qrcode = totp.gen_qrcode(user.secret_key, user.username)
-    return Response(qrcode, media_type="image/jpeg")
+    if user.secret_key is not None:
+        qrcode = totp.gen_qrcode(user.secret_key, user.username)
+        return Response(qrcode, media_type="image/jpeg")
+    else:
+        raise NotEnable2FA()
 
-@router.post("otp/verify", response_model=JwtToken)
+@router.post("/otp/verify", response_model=JwtToken)
 async def otp_verify(
     response: Response,
     verify_code: VerifyCode = Body(),
     user: User = Depends(get_user),
 ):
     if totp.verify(verify_code.code, user.secret_key):
-        refresh, access = token.create_tokens(username=user.username, email=user.email)
+        refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
         response.set_cookie("token", refresh, httponly=True)
                 
         return JwtToken(access_token=access)
     else:
         raise InvalidVerifyCode()
     
-@router.post("/logout")
+@router.post("/logout", response_model=Success)
 async def logout(
     response: Response,
     refresh: str = Cookie(alias="token"),
@@ -167,14 +182,15 @@ async def logout(
         refresh_key = f"{settings.redis.namespace}:token-blacklist:{refresh}:refresh"
         
         refresh_data = token.decode(refresh)
-        access_data = token.decode(access)
+        access_data = token.decode(access.credentials)
         
         if refresh_data["id"] != access_data["id"]:
             raise InvalidToken()
         
-        now = time.time()
-        redis.set(access_key, None, ex=access_data["exp"] - now)
-        redis.set(refresh_key, None, ex=refresh_data["exp"] - now)
+        now = int(time.time())
+        await redis.set(access_key, 1, ex=access_data["exp"] - now)
+        await redis.set(refresh_key, 1, ex=refresh_data["exp"] - now)
         response.delete_cookie("token")
+        return Success(success=True)
     except PyJWTError:
         raise InvalidToken()

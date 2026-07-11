@@ -10,10 +10,11 @@ class User(BaseModel):
     create_at: int
 
 class UserResponse(BaseModel):
-    username: str = Field(min_length=4, max_length=15)
-    name: str = Field(min_length=4, max_length=15)
+    id: int
+    username: str
+    name: str
     email: EmailStr
-    description: str = Field(max_length=50)
+    description: str
     create_at: int
 
 class UpdateData(BaseModel):

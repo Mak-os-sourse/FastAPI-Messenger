@@ -42,3 +42,7 @@ asyncio_default_test_loop_scope = "session"
 
 [tool.pytest_env]
 env_files = ["settings.env.test"]
+
+[tool.mypy]
+explicit_package_bases = true
+mypy_path = "."

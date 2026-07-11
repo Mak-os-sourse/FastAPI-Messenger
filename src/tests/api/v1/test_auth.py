@@ -44,7 +44,7 @@ async def test_update_token_fail_blacklist(redis: Redis, session: AsyncSession, 
 async def test_update_token_error_token(session: AsyncSession, client: AsyncClient):
     UserFactory.set_session(session)
     user = await UserFactory()
-    access, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
+    _, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
     
     res = await client.post(
         "auth/update-token",

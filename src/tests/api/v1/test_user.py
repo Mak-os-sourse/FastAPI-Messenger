@@ -63,3 +63,27 @@ async def test_user_update_avatar(session: AsyncSession, client: AsyncClient, st
     assert res.status_code == 200
     assert result["success"]
     assert content
+    
+async def test_user_enable_2fa(session: AsyncSession, client: AsyncClient, auth_user):
+    UserFactory.set_session(session)
+    user = await UserFactory(type_2fa=None)
+    auth_user(user)
+    
+    res = await client.post("user/2fa/enable", json={"type": "email"})
+    
+    result = res.json()
+    
+    assert res.status_code == 200
+    assert result["success"]
+
+async def test_user_disable_2fa(session: AsyncSession, client: AsyncClient, auth_user):
+    UserFactory.set_session(session)
+    user = await UserFactory(type_2fa="email")
+    auth_user(user)
+    
+    res = await client.post("user/2fa/disable")
+    
+    result = res.json()
+    
+    assert res.status_code == 200
+    assert result["success"]

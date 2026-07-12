@@ -14,4 +14,5 @@ class UserFactory(BaseFactory):
     description = fake.text(50)
     secret_key = None
     type_2fa = "email"
+    type_status = None
     

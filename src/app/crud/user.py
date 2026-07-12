@@ -1,3 +1,4 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.crud.base import BaseCRUD
 from src.app.models.user import User
@@ -8,7 +9,7 @@ class UserCrud(BaseCRUD):
         
     async def add(
         self,
-        session,
+        session: AsyncSession,
         username: str,
         name: str,
         password: str,

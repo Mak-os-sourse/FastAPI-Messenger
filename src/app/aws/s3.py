@@ -13,7 +13,7 @@ class S3:
         ).__aenter__()
         
     async def close(self):
-        await self._s3.__aexit__()
+        await self._s3.__aexit__(None, None, None)
         
     @property
     def client(self):

@@ -1,5 +1,9 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
+import dotenv, os
+
+if os.getenv("TEST") is not None:
+    dotenv.load_dotenv("settings.test.env")
 
 class DBSettings(BaseModel):
     url: str

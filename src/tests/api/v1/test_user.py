@@ -33,6 +33,18 @@ async def test_update_user(session: AsyncSession, client: AsyncClient, auth_user
     
     assert res.status_code == 200
     assert result["name"] == new_name
+
+async def test_delete_user(session: AsyncSession, client: AsyncClient, auth_user):
+    UserFactory.set_session(session)
+    user = await UserFactory()
+    auth_user(user)
+    
+    res = await client.delete("user/delete")
+    
+    result = res.json()
+    
+    assert res.status_code == 200
+    assert result["success"]
     
 async def test_user_avatar_get(session: AsyncSession, client: AsyncClient, storage: S3Storage):
     format = settings.file.base_image_format

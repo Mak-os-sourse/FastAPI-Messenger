@@ -32,6 +32,14 @@ async def update_data(
     user = await user_crud.update(session, id=user.id, **data)
     return UserResponse(**user.model_dump())
 
+@router.delete("/delete", response_model=Success)
+async def delete_user(
+    user: User = Depends(auth_user),
+    session: AsyncSession = Depends(db.get_session)
+):
+    await user_crud.delete(session, id=user.id)
+    return Success(success=True)
+
 @router.get("/avatar/get")
 async def get_avatar(
     id: str = Query(),

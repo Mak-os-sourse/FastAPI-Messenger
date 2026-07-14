@@ -8,5 +8,5 @@ class ChatFactory(BaseFactory):
     class Meta:
         model = Messege
         
-    chat_id: int
+    chat_id: int = None
     

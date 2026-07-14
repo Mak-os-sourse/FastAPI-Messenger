@@ -15,4 +15,3 @@ class UserFactory(BaseFactory):
     secret_key = None
     type_2fa = "email"
     type_status = None
-    

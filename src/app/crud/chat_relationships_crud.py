@@ -4,6 +4,9 @@ from src.app.crud.base import BaseCRUD
 from src.app.models.chat_relationships import ChatRelationships
 
 class ChatRelationshipsCrud(BaseCRUD):
+    def __init__(self):
+        super().__init__(ChatRelationships)
+    
     async def add(
         self, session: AsyncSession,
         chat_id: int,
@@ -11,7 +14,7 @@ class ChatRelationshipsCrud(BaseCRUD):
         is_admin: bool = False,
     ) -> ChatRelationships:
         return await super().add(
-            sesssion=session,
+            session=session,
             chat_id=chat_id,
             user_id=user_id,
             is_admin=is_admin,

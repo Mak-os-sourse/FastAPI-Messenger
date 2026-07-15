@@ -5,7 +5,7 @@ class Chat(BaseModel):
     id: int
     type: Literal["direct", "group"]
     name: str = Field(max_length=30)
-    description: str = Field(max_length=50)
+    description: str | None = Field(max_length=50)
     create_at: int
 
 class Invitation(BaseModel):
@@ -20,8 +20,8 @@ class InvitationResponse(Invitation):
     ...
 
 class CreateGroupChat(BaseModel):
-    name: str | None = Field(default=None, max_length=30)
-    description: str = Field(default=None, max_length=50)
+    name: str = Field(max_length=30)
+    description: str | None = Field(default=None, max_length=50)
 
 class CreateDirectChat(BaseModel):
     companion_id: int
@@ -29,16 +29,11 @@ class CreateDirectChat(BaseModel):
     description: str = Field(default=None, max_length=50)
 
 class UpdateChat(BaseModel):
-    chat_id: int
     name: str | None = Field(default=None, max_length=30)
     description: str = Field(max_length=50)
 
-class DeleteChat(BaseModel):
-    chat_id: int
-
 class CreateInvitation(BaseModel):
-    chat_id: int
     user_id: int
-
-class DeleteInvitation(BaseModel):
+    
+class AcceptInvitation(BaseModel):
     id: int

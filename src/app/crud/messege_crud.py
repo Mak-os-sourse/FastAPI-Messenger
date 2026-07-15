@@ -4,6 +4,9 @@ from src.app.crud.base import BaseCRUD
 from src.app.models.messege import Messege
 
 class MessegeCrud(BaseCRUD):
+    def __init__(self):
+        super().__init__(Messege)
+    
     async def add(
         self, session: AsyncSession,
         chat_id: int,

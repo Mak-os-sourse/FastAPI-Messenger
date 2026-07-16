@@ -33,6 +33,7 @@ class S3Settings(BaseModel):
     user: str
     password: str
     user_bucket: str
+    chat_bucket: str
 
 class Settings(BaseSettings):
     db: DBSettings

@@ -22,3 +22,7 @@ class UpdateChat(BaseModel):
     name: str | None = Field(default=None, max_length=30)
     description: str = Field(max_length=50)
     is_public_chat: bool | None = None
+
+class AcceptJoin(BaseModel):
+    invitation_id: int
+    is_admin: bool = False

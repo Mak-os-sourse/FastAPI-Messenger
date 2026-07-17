@@ -14,9 +14,12 @@ from src.app.deps.file import get_image
 from src.app.deps.auth import auth_user
 from src.app.schemas.base import Success
 from src.app.models.user import User
+from src.app.exc.chat import (
+    ChatNotFound, InvitationNotFound
+)
 from src.app.schemas.chat_group import (
     ChatGroupResponse, CreateGroupChat,
-    UpdateChat
+    UpdateChat, AcceptJoin
 )
 from src.app.core.db import db
 
@@ -91,7 +94,7 @@ async def join_user(
     chat = await chat_group_crud.get_one(session, id=chat_id)
     
     if chat_relationships is not None or chat is None:
-        raise
+        raise ChatNotFound()
     elif chat.type == "private":
         await invitation_crud.add(session, chat_id=chat_id, user_id=user.id)
     else:
@@ -102,13 +105,13 @@ async def join_user(
 @router.post("/accept-join", response_model=Success)
 async def accept_join(
     chat: ChatRelationships = Depends(get_chat_admin),
-    invitation_id: int = Body(embed=True),
+    accept_join: AcceptJoin = Body(),
     session: AsyncSession = Depends(db.get_session),
 ):
-    invitation = await invitation_crud.get_one(session, id=invitation_id)
+    invitation = await invitation_crud.get_one(session, id=accept_join.invitation_id)
     
     if invitation is None:
-        raise
+        raise InvitationNotFound
     
-    await chat_relationships_crud.add(session, chat_id=chat.id, user_id=invitation.user_id, is_admin=False)
+    await chat_relationships_crud.add(session, chat_id=chat.id, user_id=invitation.user_id, is_admin=accept_join.is_admin)
     return Success(success=True)

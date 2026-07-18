@@ -12,6 +12,6 @@ class ChatGroup(Base):
     type: Mapped[Literal["public", "private"]]
     name: Mapped[str] = mapped_column(String(length=30), nullable=True)
     description: Mapped[str] = mapped_column(String(length=50), nullable=True)
-    is_public_chat: Mapped[bool] = mapped_column()
+    admin_only: Mapped[bool] = mapped_column()
     create_at: Mapped[int] = mapped_column(default=lambda: int(time.time()))
     

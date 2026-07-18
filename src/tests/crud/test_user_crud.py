@@ -20,16 +20,14 @@ async def test_add_user(session: AsyncSession):
     assert result.model_dump() == user.model_dump()
     
 async def test_get_all_users(session: AsyncSession):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+    user = await UserFactory.create()
     
     result = await user_crud.get_all(session, id=user.id)
     
     assert result[0].model_dump() == user.model_dump()
 
 async def test_get_user(session: AsyncSession):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+    user = await UserFactory.create()
     
     result = await user_crud.get_one(session, id=user.id)
     
@@ -37,16 +35,14 @@ async def test_get_user(session: AsyncSession):
 
 async def test_update_user(session: AsyncSession):
     old_name = fake.name()
-    UserFactory.set_session(session)
-    user = await UserFactory()
+    user = await UserFactory.create()
     
     result = await user_crud.update(session, id=user.id, name=fake.name())
     
     assert result.name != old_name
     
 async def test_delete_user(session: AsyncSession):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+    user = await UserFactory.create()
     
     result = await user_crud.delete(session, id=user.id)
     

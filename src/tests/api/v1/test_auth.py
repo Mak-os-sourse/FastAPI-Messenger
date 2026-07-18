@@ -9,9 +9,8 @@ from src.app.services.security import hash_lib
 from src.tests.factories.user import UserFactory
 from src.app.services.security import totp, token
 
-async def test_update_token(session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_update_token(client: AsyncClient):
+    user = await UserFactory.create()
     access, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
     
     res = await client.post(
@@ -26,9 +25,8 @@ async def test_update_token(session: AsyncSession, client: AsyncClient):
     assert result["access_token"]
     assert res.cookies.get("token")
 
-async def test_update_token_fail_blacklist(redis: Redis, session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_update_token_fail_blacklist(redis: Redis, client: AsyncClient):
+    user = await UserFactory.create()
     access, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
     access_key = f"{settings.redis.namespace}:token-blacklist:{access}:access"
     await redis.set(access_key, 1)
@@ -41,9 +39,8 @@ async def test_update_token_fail_blacklist(redis: Redis, session: AsyncSession, 
     
     assert res.status_code == 401
 
-async def test_update_token_error_token(session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_update_token_error_token(client: AsyncClient):
+    user = await UserFactory.create()
     _, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
     
     res = await client.post(
@@ -54,9 +51,8 @@ async def test_update_token_error_token(session: AsyncSession, client: AsyncClie
     
     assert res.status_code == 401
 
-async def test_regist_user_error_user_is_exists(session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_regist_user_error_user_is_exists(client: AsyncClient):
+    user = await UserFactory.create()
     username = user.username
     res = await client.post("auth/regist", json={
         "username": username,
@@ -84,10 +80,10 @@ async def test_regist_user(client: AsyncClient):
     assert result["access_token"]
     assert res.cookies.get("token")
 
-async def test_login_user_disable_2fa(session: AsyncSession, client: AsyncClient):
+async def test_login_user_disable_2fa(client: AsyncClient):
     password = fake.password()
     username = fake.user_name()
-    UserFactory.set_session(session)
+    
     await UserFactory(type_2fa=None, username=username, password=hash_lib.hash(password))
     
     res = await client.post("auth/login", json={
@@ -101,10 +97,10 @@ async def test_login_user_disable_2fa(session: AsyncSession, client: AsyncClient
     assert result["access_token"]
     assert res.cookies.get("token")
 
-async def test_login_user_enable_2fa(session: AsyncSession, client: AsyncClient):
+async def test_login_user_enable_2fa(client: AsyncClient):
     password = fake.password()
     username = fake.user_name()
-    UserFactory.set_session(session)
+    
     user = await UserFactory(type_2fa="email", username=username, password=hash_lib.hash(password))
     
     res = await client.post("auth/login", json={
@@ -127,10 +123,10 @@ async def test_login_user_error_user_not_found(client: AsyncClient):
     
     assert res.status_code == 401
 
-async def test_login_user_error_fail_password(session: AsyncSession, client: AsyncClient):
+async def test_login_user_error_fail_password(client: AsyncClient):
     password = fake.password()
     username = fake.user_name()
-    UserFactory.set_session(session)
+    
     user = await UserFactory(type_2fa="email", username=username, password=hash_lib.hash(password))
     
     res = await client.post("auth/login", json={
@@ -140,9 +136,8 @@ async def test_login_user_error_fail_password(session: AsyncSession, client: Asy
     
     assert res.status_code == 401
 
-async def test_verify_gen_code(redis: Redis, session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_verify_gen_code(redis: Redis, client: AsyncClient):
+    user = await UserFactory.create()
     
     res = await client.post("auth/verify-code/gen", params={
         "user_id": user.id,
@@ -154,9 +149,8 @@ async def test_verify_gen_code(redis: Redis, session: AsyncSession, client: Asyn
     assert result["send_code"]
     assert await redis.keys()
     
-async def test_verify_code(redis: Redis, session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_verify_code(redis: Redis, client: AsyncClient):
+    user = await UserFactory.create()
     
     code = 357_659
     key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
@@ -174,9 +168,8 @@ async def test_verify_code(redis: Redis, session: AsyncSession, client: AsyncCli
     assert result["access_token"]
     assert res.cookies.get("token")
     
-async def test_verify_code_error_invalid_code(redis: Redis, session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_verify_code_error_invalid_code(redis: Redis, client: AsyncClient):
+    user = await UserFactory.create()
     
     code = 357_659
     key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
@@ -190,8 +183,7 @@ async def test_verify_code_error_invalid_code(redis: Redis, session: AsyncSessio
     
     assert res.status_code == 401
 
-async def test_gen_qecode(session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
+async def test_gen_qecode(client: AsyncClient):
     user = await UserFactory(secret_key=totp.gen_secret_key())
     
     res = await client.post(
@@ -202,9 +194,8 @@ async def test_gen_qecode(session: AsyncSession, client: AsyncClient):
     assert res.status_code == 200
     assert res.content
 
-async def test_gen_qecode_error_not_enable_2fa(session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_gen_qecode_error_not_enable_2fa(client: AsyncClient):
+    user = await UserFactory.create()
     
     res = await client.post(
         "auth/opt/gen-qrcode",
@@ -214,8 +205,7 @@ async def test_gen_qecode_error_not_enable_2fa(session: AsyncSession, client: As
     assert res.status_code == 409
     assert res.content
 
-async def test_verify_otp(session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
+async def test_verify_otp(client: AsyncClient):
     user = await UserFactory(secret_key=totp.gen_secret_key())
     code = pyotp.TOTP(user.secret_key).now()
     
@@ -231,9 +221,8 @@ async def test_verify_otp(session: AsyncSession, client: AsyncClient):
     assert result["access_token"]
     assert res.cookies.get("token")
 
-async def test_logout(redis: Redis, session: AsyncSession, client: AsyncClient):
-    UserFactory.set_session(session)
-    user = await UserFactory()
+async def test_logout(redis: Redis, client: AsyncClient):
+    user = await UserFactory.create()
     access, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
     
     res = await client.post(

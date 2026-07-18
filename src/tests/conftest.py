@@ -3,6 +3,7 @@ from httpx import ASGITransport, AsyncClient
 from redis.asyncio import Redis
 
 from main import app
+from src.tests.factories.base import _session_manager
 from src.app.core.settings import settings
 from src.app.aws import S3Storage, s3, get_storage
 from src.app.deps.auth import auth_user as auth_user_deps
@@ -30,6 +31,7 @@ async def redis():
 @pytest_asyncio.fixture()
 async def session():
     async with db.sessionmaker() as session:
+        _session_manager.session = session
         yield session
         await session.rollback()
 

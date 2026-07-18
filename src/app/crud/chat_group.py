@@ -13,12 +13,12 @@ class ChatCrud(BaseCRUD):
         type: Literal["direct", "group"],
         name: str | None = None,
         description: str | None = None,
-        is_public_chat: bool = False,
+        admin_only: bool = False,
     ) -> ChatGroup:
         return await super().add(
             session, type=type, name=name,
             description=description,
-            is_public_chat=is_public_chat
+            admin_only=admin_only
         )
     
 chat_group_crud = ChatCrud()

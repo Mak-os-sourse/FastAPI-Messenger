@@ -14,11 +14,11 @@ async def test_create_chat_direct(session: AsyncSession, client: AsyncClient, au
         "/chat/direct/create",
         json={
             "companion_id": companion.id,
-            "name": fake.name()
         }
     )
     
     result = res.json()
     
     assert res.status_code == 200
-    assert result["type"] == "direct"
+    assert result["user_id_one"] == user.id
+    assert result["user_id_two"] == companion.id

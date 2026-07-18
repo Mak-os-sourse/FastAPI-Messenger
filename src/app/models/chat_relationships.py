@@ -12,4 +12,4 @@ class ChatRelationships(Base):
     is_admin: Mapped[bool] = mapped_column(default=False)
     
     user: Mapped["User"] = relationship(lazy="joined")
-    chat: Mapped["Chat"] = relationship(lazy="joined")
+    chat: Mapped["ChatGroup"] = relationship(lazy="joined")

@@ -115,3 +115,12 @@ async def accept_join(
     
     await chat_relationships_crud.add(session, chat_id=chat.id, user_id=invitation.user_id, is_admin=accept_join.is_admin)
     return Success(success=True)
+
+@router.post("/extended-rights", response_model=Success)
+async def extended_rights(
+    chat: ChatRelationships = Depends(get_chat_admin),
+    user_id: int = Body(embed=True),
+    session: AsyncSession = Depends(db.get_session),
+):
+    await chat_relationships_crud.update(session, id=chat.id, is_admin=True)
+    return Success(success=True)

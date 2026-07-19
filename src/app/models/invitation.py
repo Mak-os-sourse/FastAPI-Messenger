@@ -7,7 +7,7 @@ class Invitation(Base):
     __tablename__ = "Invitation"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    chat_id: Mapped[int] = mapped_column(ForeignKey("Chats.id"))
+    chat_id: Mapped[int] = mapped_column(ForeignKey("ChatsGroup.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     
     user: Mapped["User"] = relationship(lazy="selectin")

@@ -3,15 +3,13 @@ from src.tests.factories.base import BaseFactory
 from factory import SubFactory, LazyAttribute
 from src.tests.factories.user import UserFactory
 from src.tests.factories.chat_group import ChatGroupFactory
-from src.app.models.chat_relationships import ChatRelationships
+from src.app.models.invitation import Invitation
 
-class ChatRelationshipsFactory(BaseFactory):
+class InvitationFactory(BaseFactory):
     class Meta:
-        model = ChatRelationships
+        model = Invitation
         
     user = SubFactory(UserFactory)
-    chat = SubFactory(ChatGroupFactory)
 
     user_id = LazyAttribute(lambda m: m.user.id)
     chat_id = LazyAttribute(lambda m: m.chat.id)
-    is_admin: bool

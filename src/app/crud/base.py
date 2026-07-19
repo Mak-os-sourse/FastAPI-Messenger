@@ -25,8 +25,8 @@ class BaseCRUD:
         if result:
             return result[0]
     
-    async def update(self, session: AsyncSession, id: int, **values) -> TModel:
-        stmt = update(self.model).where(self.model.id == id).values(**values).returning(self.model)
+    async def update(self, session: AsyncSession, id: int, whereclause: list[BinaryExpression] = None, **values) -> TModel:
+        stmt = update(self.model).where(self.model.id == id, *whereclause if whereclause is not None else []).values(**values).returning(self.model)
         resutl = await session.scalars(stmt)
         await session.flush()
         return resutl.one()

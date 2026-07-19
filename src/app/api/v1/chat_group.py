@@ -58,7 +58,7 @@ async def get_avatar(
 
 @router.put("/avatar/update", response_model=Success)
 async def update_avatar(
-    user: User = Depends(auth_user),
+    chat: ChatRelationships = Depends(get_chat_admin),
     image: UploadFile = Depends(get_image),
     storage: S3Storage = Depends(get_storage),
 ):
@@ -67,12 +67,12 @@ async def update_avatar(
     await storage.upload(
         file=(await image.read()),
         bucket=settings.s3.chat_bucket,
-        key=f"avatar-{user.id}.{suffix}"
+        key=f"avatar-{chat.chat_id}.{suffix}"
     )
     await save_convert.kiq(
         bucket=settings.s3.chat_bucket,
-        key=f"avatar-{user.id}.{suffix}",
-        new_key=f"avatar-{user.id}-formatted.{format}"
+        key=f"avatar-{chat.chat_id}.{suffix}",
+        new_key=f"avatar-{chat.chat_id}-formatted.{format}"
     )
     return Success(success=True)
 
@@ -122,5 +122,5 @@ async def extended_rights(
     user_id: int = Body(embed=True),
     session: AsyncSession = Depends(db.get_session),
 ):
-    await chat_relationships_crud.update(session, id=chat.id, is_admin=True)
+    await chat_relationships_crud.update(session, id=chat.id, whereclause=[ChatRelationships.user_id == user_id], is_admin=True)
     return Success(success=True)

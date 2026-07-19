@@ -7,7 +7,7 @@ class Messege(Base):
     __tablename__ = "Messeges"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    chat_id: Mapped[int] = mapped_column(ForeignKey("Chats.id"))
+    chat_id: Mapped[int] = mapped_column()
     user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     content: Mapped[str] = mapped_column()
     

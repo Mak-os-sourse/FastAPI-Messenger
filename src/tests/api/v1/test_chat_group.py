@@ -164,10 +164,8 @@ async def test_accept_join_chat_group(session: AsyncSession, client: AsyncClient
     assert data is not None
     
 async def test_extended_rights_chat_group(session: AsyncSession, client: AsyncClient, auth_user):
-    user = await UserFactory.create()
-    chat_group = await ChatGroupFactory.create()
-    chat_one = await ChatRelationshipsFactory.create(is_admin=True, chat=chat_group)
-    chat_two = await ChatRelationshipsFactory.create(is_admin=False, user=user, chat=chat_group)
+    chat_one = await ChatRelationshipsFactory.create(is_admin=True)
+    chat_two = await ChatRelationshipsFactory.create(is_admin=False, chat=chat_one.chat)
     auth_user(chat_one.user)
 
     res = await client.post(
@@ -178,8 +176,6 @@ async def test_extended_rights_chat_group(session: AsyncSession, client: AsyncCl
     
     result = res.json()
     
-    data = await chat_relationships_crud.get_one(session, id=chat_two.id)
-    
     assert res.status_code == 200
     assert result["success"]
-    assert data.is_admin
+    assert chat_two.is_admin

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Body, Query, UploadFile, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 
+from src.app.services.avatar_manager import avatar_manager
 from src.app.aws import S3Storage, get_storage
-from src.app.tasks.file import save_convert
 from src.app.core.settings import settings
 from src.app.deps.file import get_image
 from src.app.deps.auth import auth_user
@@ -46,10 +46,7 @@ async def get_avatar(
     storage: S3Storage = Depends(get_storage),
 ):
     format = settings.file.base_image_format
-    image = await storage.get(
-        bucket=settings.s3.user_bucket,
-        key=f"avatar-{id}-formatted.{format}",
-    )
+    image = await avatar_manager.get(storage, id=id)
     return Response(image, media_type=f"image/{format}")
 
 @router.put("/avatar/update", response_model=Success)
@@ -58,17 +55,12 @@ async def update_avatar(
     image: UploadFile = Depends(get_image),
     storage: S3Storage = Depends(get_storage),
 ):
-    format = settings.file.base_image_format
     suffix = Path(image.filename).suffix
-    await storage.upload(
+    await avatar_manager.save(
+        storage, id=user.id,
+        bucket=settings.s3.user_bucket,
         file=(await image.read()),
-        bucket=settings.s3.user_bucket,
-        key=f"avatar-{user.id}.{suffix}"
-    )
-    await save_convert.kiq(
-        bucket=settings.s3.user_bucket,
-        key=f"avatar-{user.id}.{suffix}",
-        new_key=f"avatar-{user.id}-formatted.{format}"
+        input_format=suffix
     )
     return Success(success=True)
 

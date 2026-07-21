@@ -2,6 +2,7 @@ from taskiq import TaskiqDepends
 
 from src.app.core.task_broker import broker
 from src.app.aws import get_storage, S3Storage
+from src.app.exc.file import UnsupportedMediaFormat
 from src.app.services.ffmpeg_tools import ffmpeg_tools, FormatFile
 
 @broker.task
@@ -14,7 +15,7 @@ async def save_convert(
     format_file = key.split(".")[-1]
     format = getattr(FormatFile, format_file, None)
     if format is None:
-        raise # bla bla bla
+        raise UnsupportedMediaFormat()
     
     file = await storage.get(bucket=bucket, key=key)
     

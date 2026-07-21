@@ -4,11 +4,11 @@ from pathlib import Path
 
 from src.app.crud.chat_relationships_crud import chat_relationships_crud
 from src.app.models.chat_relationships import ChatRelationships
+from src.app.services.avatar_manager import avatar_manager
 from src.app.crud.invitation_crud import invitation_crud
 from src.app.crud.chat_group import chat_group_crud
 from src.app.aws import S3Storage, get_storage
 from src.app.deps.chat import get_chat_admin
-from src.app.tasks.file import save_convert
 from src.app.core.settings import settings
 from src.app.deps.file import get_image
 from src.app.deps.auth import auth_user
@@ -50,10 +50,7 @@ async def get_avatar(
     storage: S3Storage = Depends(get_storage),
 ):
     format = settings.file.base_image_format
-    image = await storage.get(
-        bucket=settings.s3.user_bucket,
-        key=f"avatar-{id}-formatted.{format}",
-    )
+    image = await avatar_manager.get(storage, id=id)
     return Response(image, media_type=f"image/{format}")
 
 @router.put("/avatar/update", response_model=Success)
@@ -62,17 +59,12 @@ async def update_avatar(
     image: UploadFile = Depends(get_image),
     storage: S3Storage = Depends(get_storage),
 ):
-    format = settings.file.base_image_format
     suffix = Path(image.filename).suffix
-    await storage.upload(
+    await avatar_manager.save(
+        storage, id=chat.chat_id,
+        bucket=settings.s3.chat_bucket,
         file=(await image.read()),
-        bucket=settings.s3.chat_bucket,
-        key=f"avatar-{chat.chat_id}.{suffix}"
-    )
-    await save_convert.kiq(
-        bucket=settings.s3.chat_bucket,
-        key=f"avatar-{chat.chat_id}.{suffix}",
-        new_key=f"avatar-{chat.chat_id}-formatted.{format}"
+        input_format=suffix
     )
     return Success(success=True)
 
@@ -122,5 +114,5 @@ async def extended_rights(
     user_id: int = Body(embed=True),
     session: AsyncSession = Depends(db.get_session),
 ):
-    await chat_relationships_crud.update(session, id=chat.id, whereclause=[ChatRelationships.user_id == user_id], is_admin=True)
+    await chat_relationships_crud.extended_rights(session, user_id=user_id, chat_id=chat.chat_id)
     return Success(success=True)

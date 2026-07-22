@@ -20,7 +20,7 @@ class CreateGroupChat(BaseModel):
     
 class UpdateChat(BaseModel):
     name: str | None = Field(default=None, max_length=30)
-    description: str = Field(default=None, max_length=50)
+    description: str | None = Field(default=None, max_length=50)
     admin_only: bool | None = None
 
 class AcceptJoin(BaseModel):

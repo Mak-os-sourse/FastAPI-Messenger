@@ -24,5 +24,5 @@ async def create_chat(
     if companion is None:
         raise UserNotFoud()
 
-    chat = await chat_direct_crud.add(session, user_id_one=user.id, user_id_two=create_chat_model.companion_id)
+    chat = await chat_direct_crud.add_if_not_exists(session, user_id_one=user.id, user_id_two=create_chat_model.companion_id)
     return ChatDirectResponse(**chat.model_dump())

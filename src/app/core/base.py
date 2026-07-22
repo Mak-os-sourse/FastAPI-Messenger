@@ -2,8 +2,6 @@ from sqlalchemy.orm import DeclarativeBase
 from typing import TypeVar
 from copy import deepcopy
 
-TModel = TypeVar("TModel")
-
 class Base(DeclarativeBase):
     def model_dump(self):
         dict_model = self.__dict__
@@ -14,3 +12,5 @@ class Base(DeclarativeBase):
             elif key.find("_") == 0:
                 result.pop(key)
         return result
+    
+TModel = TypeVar("TModel", bound=Base)

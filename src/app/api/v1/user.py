@@ -74,7 +74,7 @@ async def enable_2fa(
     return Success(success=True)
 
 @router.post("/2fa/disable", response_model=Success)
-async def enable_2fa(
+async def disable_2fa(
     user: User = Depends(auth_user),
     session: AsyncSession = Depends(db.get_session),
 ):

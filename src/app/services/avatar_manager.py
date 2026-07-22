@@ -6,7 +6,7 @@ class AvatarManager:
     async def save(
         self, 
         storage: S3Storage, 
-        id: int, 
+        id: int | str, 
         bucket: str,
         file: bytes, 
         input_format: str
@@ -23,7 +23,7 @@ class AvatarManager:
             new_key=f"avatar-{id}-formatted.{format}"
         )
     
-    async def get(self, storage: S3Storage, id: int):
+    async def get(self, storage: S3Storage, id: int | str):
         format = settings.file.base_image_format
         image = await storage.get(
             bucket=settings.s3.user_bucket,

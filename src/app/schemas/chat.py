@@ -12,7 +12,7 @@ class InvitationResponse(Invitation):
 class CreateDirectChat(BaseModel):
     companion_id: int
     name: str | None = Field(default=None, max_length=30)
-    description: str = Field(default=None, max_length=50)
+    description: str | None = Field(default=None, max_length=50)
 
 class CreateInvitation(BaseModel):
     user_id: int

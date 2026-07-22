@@ -7,7 +7,7 @@ from jwt import PyJWTError
 from numpy import random
 import time
 
-from src.app.services.security import token, hash_lib, totp
+from src.app.services.security import token, hash_lib, totp, black_list
 from src.app.schemas.base import Success
 from src.app.schemas.auth import (
     VerifyCode, LoginUser,
@@ -41,15 +41,11 @@ async def update_token(
     access: HTTPAuthorizationCredentials = Depends(security),
 ):
     try:
-        access_key = f"{settings.redis.namespace}:token-blacklist:{access.credentials}:access"
-        refresh_key = f"{settings.redis.namespace}:token-blacklist:{refresh}:refresh"
-        
         refresh_data = token.decode(refresh)
         access_data = token.decode(access.credentials, verify_exp=False)
+        access_key, refresh_key = await black_list.get(redis, access=access.credentials, refresh=refresh)
         
-        if await redis.get(access_key) is not None:
-            raise InvalidToken()
-        if await redis.get(refresh_key) is not None:
+        if access_key is not None or refresh_key is not None:
             raise InvalidToken()
         if not refresh_data and not access_data:
             raise InvalidToken()  
@@ -60,8 +56,7 @@ async def update_token(
         if user is None:
             raise InvalidToken()
         
-        now = int(time.time())
-        await redis.set(refresh_key, 1, ex=refresh_data["exp"] - now)
+        await black_list.set(redis, refresh=refresh)
         
         refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
         response.set_cookie("token", refresh, httponly=True)
@@ -178,18 +173,13 @@ async def logout(
     access: HTTPAuthorizationCredentials = Depends(security),
 ):
     try:
-        access_key = f"{settings.redis.namespace}:token-blacklist:{access.credentials}:access"
-        refresh_key = f"{settings.redis.namespace}:token-blacklist:{refresh}:refresh"
-        
         refresh_data = token.decode(refresh)
         access_data = token.decode(access.credentials)
         
         if refresh_data["id"] != access_data["id"]:
             raise InvalidToken()
         
-        now = int(time.time())
-        await redis.set(access_key, 1, ex=access_data["exp"] - now)
-        await redis.set(refresh_key, 1, ex=refresh_data["exp"] - now)
+        await black_list.set(redis, access=access.credentials, refresh=refresh)
         response.delete_cookie("token")
         return Success(success=True)
     except PyJWTError:

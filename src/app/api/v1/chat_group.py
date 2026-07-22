@@ -69,7 +69,7 @@ async def update_avatar(
     return Success(success=True)
 
 @router.delete("/delete", response_model=Success)
-async def update_chat(
+async def delete_chat(
     chat: ChatRelationships = Depends(get_chat_admin),
     session: AsyncSession = Depends(db.get_session),
 ):
@@ -103,9 +103,9 @@ async def accept_join(
     invitation = await invitation_crud.get_one(session, id=accept_join.invitation_id)
     
     if invitation is None:
-        raise InvitationNotFound
+        raise InvitationNotFound()
     
-    await chat_relationships_crud.add(session, chat_id=chat.id, user_id=invitation.user_id, is_admin=accept_join.is_admin)
+    await chat_relationships_crud.add(session, chat_id=chat.chat_id, user_id=invitation.user_id, is_admin=accept_join.is_admin)
     return Success(success=True)
 
 @router.post("/extended-rights", response_model=Success)

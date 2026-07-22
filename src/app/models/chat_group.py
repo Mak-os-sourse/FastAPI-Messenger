@@ -6,7 +6,7 @@ from sqlalchemy import String
 from src.app.core.base import Base
 
 class ChatGroup(Base):
-    __tablename__ = "ChatsGroup"
+    __tablename__ = "ChatGroups"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     type: Mapped[Literal["public", "private"]]

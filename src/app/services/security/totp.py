@@ -13,12 +13,12 @@ class Totp:
         """Return JPEG file"""
         buff = BytesIO()
         uri = self.gen_uri(secret_key, username)
-        qrcode.make(uri).save(buff, format="JPEG")
+        qrcode.make(uri).save(buff, format="    ")
         buff.seek(0)
         return buff.read()
     
-    def verify(self, code: str, secret_key: str) -> bool:
+    def verify(self, code: str | int, secret_key: str) -> bool:
         totp = pyotp.TOTP(secret_key)
-        return totp.verify(code)
+        return totp.verify(str(code))
     
 totp = Totp()

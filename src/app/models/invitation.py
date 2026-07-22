@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey
 from src.app.core.base import Base
 
 class Invitation(Base):
-    __tablename__ = "Invitation"
+    __tablename__ = "Invitations"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     chat_id: Mapped[int] = mapped_column(ForeignKey("ChatsGroup.id"))

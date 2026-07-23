@@ -7,7 +7,7 @@ class ChatRelationships(Base):
     __tablename__ = "ChatRelationships"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    chat_id: Mapped[int] = mapped_column(ForeignKey("ChatsGroup.id", ondelete="CASCADE"))
+    chat_id: Mapped[int] = mapped_column(ForeignKey("ChatGroups.id", ondelete="CASCADE"))
     user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     is_admin: Mapped[bool] = mapped_column(default=False)
     

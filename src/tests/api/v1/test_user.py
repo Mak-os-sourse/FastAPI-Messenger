@@ -46,7 +46,7 @@ async def test_user_avatar_get(client: AsyncClient, storage: S3Storage):
     format = settings.file.base_image_format
     user = await UserFactory.create()
     
-    await storage.upload(file="src/tests/test.jpeg", bucket=settings.s3.user_bucket, key=f"avatar-{user.id}-formatted.{format}")
+    await storage.upload(file="src/tests/test.jpeg", bucket=settings.s3.user_bucket, key=f"avatar-{user.id}.{format}")
     
     res = await client.get("user/avatar/get", params={
         "id": user.id,

@@ -1,3 +1,4 @@
+import base64
 from taskiq import TaskiqDepends
 
 from src.app.core.task_broker import broker
@@ -7,6 +8,7 @@ from src.app.services.ffmpeg_tools import ffmpeg_tools, FormatFile
 
 @broker.task
 async def save_convert(
+    file: str,
     bucket: str,
     key: str,
     new_key: str,
@@ -17,7 +19,7 @@ async def save_convert(
     if format is None:
         raise UnsupportedMediaFormat()
     
-    file = await storage.get(bucket=bucket, key=key)
+    file = base64.b64decode(file.encode())
     
     data = await ffmpeg_tools.convert(file=file, output_format=format)
     

@@ -57,11 +57,10 @@ async def get_avatar(
 async def update_avatar(
     chat: ChatRelationships = Depends(get_chat_admin),
     image: UploadFile = Depends(get_image),
-    storage: S3Storage = Depends(get_storage),
 ):
     suffix = Path(image.filename).suffix
     await avatar_manager.save(
-        storage, id=chat.chat_id,
+        id=chat.chat_id,
         bucket=settings.s3.chat_bucket,
         file=(await image.read()),
         input_format=suffix

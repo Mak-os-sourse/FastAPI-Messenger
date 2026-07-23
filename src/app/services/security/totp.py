@@ -13,7 +13,7 @@ class Totp:
         """Return JPEG file"""
         buff = BytesIO()
         uri = self.gen_uri(secret_key, username)
-        qrcode.make(uri).save(buff, format="    ")
+        qrcode.make(uri).save(buff, format="JPEG")
         buff.seek(0)
         return buff.read()
     

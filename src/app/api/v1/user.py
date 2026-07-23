@@ -53,11 +53,10 @@ async def get_avatar(
 async def update_avatar(
     user: User = Depends(auth_user),
     image: UploadFile = Depends(get_image),
-    storage: S3Storage = Depends(get_storage),
 ):
     suffix = Path(image.filename).suffix
     await avatar_manager.save(
-        storage, id=user.id,
+        id=user.id,
         bucket=settings.s3.user_bucket,
         file=(await image.read()),
         input_format=suffix

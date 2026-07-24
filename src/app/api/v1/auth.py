@@ -5,7 +5,6 @@ from fastapi.responses import Response
 from redis.asyncio import Redis
 from jwt import PyJWTError
 from numpy import random
-import time
 
 from src.app.services.security import token, hash_lib, totp, black_list
 from src.app.schemas.base import Success

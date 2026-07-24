@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
 
-from src.app.crud.chat_relationships_crud import chat_relationships_crud
+from src.app.crud.chat_relationships import chat_relationships_crud
 from src.tests.factories.chat_relationships import ChatRelationshipsFactory
 from src.tests.factories.invitation import InvitationFactory
 from src.tests.factories.chat_group import ChatGroupFactory

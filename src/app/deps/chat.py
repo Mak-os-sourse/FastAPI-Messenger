@@ -1,7 +1,7 @@
 from fastapi import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.crud.chat_relationships_crud import chat_relationships_crud
+from src.app.crud.chat_relationships import chat_relationships_crud
 from src.app.models.chat_relationships import ChatRelationships
 from src.app.exc.chat import UserNotAdminInChat
 from src.app.deps.auth import auth_user

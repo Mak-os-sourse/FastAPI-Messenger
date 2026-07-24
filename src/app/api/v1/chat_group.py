@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, Body, Query, Response, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 
-from src.app.crud.chat_relationships_crud import chat_relationships_crud
+from src.app.crud.chat_relationships import chat_relationships_crud
 from src.app.models.chat_relationships import ChatRelationships
 from src.app.services.avatar_manager import avatar_manager
-from src.app.crud.invitation_crud import invitation_crud
+from src.app.crud.invitation import invitation_crud
 from src.app.crud.chat_group import chat_group_crud
 from src.app.aws import S3Storage, get_storage
 from src.app.deps.chat import get_chat_admin

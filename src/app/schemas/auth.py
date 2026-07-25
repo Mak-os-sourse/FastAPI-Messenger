@@ -1,5 +1,8 @@
 from pydantic import BaseModel, Field, EmailStr
 
+class WSToken(BaseModel):
+    token: str
+
 class JwtToken(BaseModel):
     access_token: str
     token_type: str = "bearer"

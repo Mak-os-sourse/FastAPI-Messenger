@@ -3,7 +3,7 @@ from typing import Literal
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String
 
-from src.app.core.base import Base
+from app.core.base import Base
 
 class ChatGroup(Base):
     __tablename__ = "ChatGroups"

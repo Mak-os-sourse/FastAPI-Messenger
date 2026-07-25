@@ -1,5 +1,11 @@
 from fastapi import HTTPException, status
 
+from app.exc.webscoket import WebSocketError
+
+class WSInvalidToken(WebSocketError):
+    def __init__(self):
+        super().__init__("Invalid token", error_name="InvalidToken")
+
 class InvalidToken(HTTPException):
     def __init__(self, headers = None):
         super().__init__(status.HTTP_401_UNAUTHORIZED, "Invalid token", headers)

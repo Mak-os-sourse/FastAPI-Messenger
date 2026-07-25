@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
 
-from src.tests.fake import fake
-from src.app.aws import S3Storage
-from src.app.core.settings import settings
-from src.tests.factories.user import UserFactory
+from tests.fake import fake
+from app.aws import S3Storage
+from app.core.settings import settings
+from tests.factories.user import UserFactory
 
 async def test_get_user_me(client: AsyncClient, auth_user):
     user = await UserFactory.create()
@@ -64,7 +64,7 @@ async def test_user_update_avatar(client: AsyncClient, storage: S3Storage, auth_
     res = await client.put("user/avatar/update", files=files)
     result = res.json()
     
-    content = await storage.get(bucket=settings.s3.user_bucket, key=f"avatar-{user.id}-formatted.{format}")
+    content = await storage.get(bucket=settings.s3.user_bucket, key=f"avatar-{user.id}.{format}")
     
     assert res.status_code == 200
     assert result["success"]

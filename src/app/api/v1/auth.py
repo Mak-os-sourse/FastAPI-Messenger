@@ -6,28 +6,28 @@ from redis.asyncio import Redis
 from jwt import PyJWTError
 from numpy import random
 
-from src.app.services.security import token, hash_lib, totp, black_list
-from src.app.schemas.base import Success
-from src.app.schemas.auth import (
+from app.services.security import token, hash_lib, totp, black_list
+from app.schemas.base import Success
+from app.schemas.auth import (
     VerifyCode, LoginUser,
     LoginUserResponse, JwtToken,
     VerifyCodeResponse, CreateUser
 )
-from src.app.exc.auth import (
+from app.exc.auth import (
     InvalidToken,
     InvalidVerifyCode,
     NotEnable2FA,
     Unauthorized,
     ErrorGenCode,
 )
-from src.app.exc.user import UserAlreadyExists
-from src.app.core.settings import settings
-from src.app.crud.user import user_crud
-from src.app.deps.user import get_user
-from src.app.deps.auth import security
-from src.app.core.cache import cache
-from src.app.models.user import User
-from src.app.core.db import db
+from app.exc.user import UserAlreadyExists
+from app.core.settings import settings
+from app.crud.user import user_crud
+from app.deps.user import get_user
+from app.deps.auth import security
+from app.core.cache import cache
+from app.models.user import User
+from app.core.db import db
 
 router = APIRouter(prefix="/auth")
 

@@ -3,11 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 from httpx import AsyncClient
 
-from src.tests.fake import fake
-from src.app.core.settings import settings
-from src.app.services.security import hash_lib
-from src.tests.factories.user import UserFactory
-from src.app.services.security import totp, token
+from tests.fake import fake
+from app.core.settings import settings
+from app.services.security import hash_lib
+from tests.factories.user import UserFactory
+from app.services.security import totp, token
 
 async def test_update_token(client: AsyncClient):
     user = await UserFactory.create()

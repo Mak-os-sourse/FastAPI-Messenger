@@ -2,26 +2,26 @@ from fastapi import APIRouter, Depends, Body, Query, Response, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 
-from src.app.crud.chat_relationships import chat_relationships_crud
-from src.app.models.chat_relationships import ChatRelationships
-from src.app.services.avatar_manager import avatar_manager
-from src.app.crud.invitation import invitation_crud
-from src.app.crud.chat_group import chat_group_crud
-from src.app.aws import S3Storage, get_storage
-from src.app.deps.chat import get_chat_admin
-from src.app.core.settings import settings
-from src.app.deps.file import get_image
-from src.app.deps.auth import auth_user
-from src.app.schemas.base import Success
-from src.app.models.user import User
-from src.app.exc.chat import (
+from app.crud.chat_relationships import chat_relationships_crud
+from app.models.chat_relationships import ChatRelationships
+from app.services.avatar_manager import avatar_manager
+from app.crud.invitation import invitation_crud
+from app.crud.chat_group import chat_group_crud
+from app.aws import S3Storage, get_storage
+from app.deps.chat import get_chat_admin
+from app.core.settings import settings
+from app.deps.file import get_image
+from app.deps.auth import auth_user
+from app.schemas.base import Success
+from app.models.user import User
+from app.exc.chat import (
     ChatNotFound, InvitationNotFound
 )
-from src.app.schemas.chat_group import (
+from app.schemas.chat_group import (
     ChatGroupResponse, CreateGroupChat,
     UpdateChat, AcceptJoin
 )
-from src.app.core.db import db
+from app.core.db import db
 
 router = APIRouter(prefix="/chat/group")
 

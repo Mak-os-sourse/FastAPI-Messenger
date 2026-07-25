@@ -1,6 +1,6 @@
 import hashlib
 
-from src.app.core.settings import settings
+from app.core.settings import settings
 
 class Hash:
     def hash(self, data: str) -> str:

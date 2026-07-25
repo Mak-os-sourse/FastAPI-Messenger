@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.crud.base import BaseCRUD
-from src.app.models.user import User
+from app.crud.base import BaseCRUD
+from app.models.user import User
 
 class UserCrud(BaseCRUD):
     def __init__(self):

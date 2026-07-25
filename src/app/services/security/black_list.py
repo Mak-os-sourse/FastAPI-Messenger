@@ -1,8 +1,8 @@
 import time
 from redis.asyncio import Redis
 
-from src.app.services.security import token
-from src.app.core.settings import settings
+from app.services.security import token
+from app.core.settings import settings
 
 class BlackList:
     async def set(self, redis: Redis, access: str | None = None, refresh:  str | None = None) -> None:

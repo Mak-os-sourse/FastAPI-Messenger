@@ -13,10 +13,10 @@ class ConnectionManager:
         
     async def receive_json(self, websocket: WebSocket) -> dict:
         await websocket.receive_json()
-    
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
+        
+    async def send_personal_message(self, data: str, websocket: WebSocket):
+            await websocket.send(data)
+            
     async def broadcast(self, message: str):
         for connection in self.active_connections:
             await connection.send_text(message)

@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.crud.user import user_crud
-from src.app.deps.auth import auth_user
-from src.app.crud.chat_direct import chat_direct_crud
-from src.app.models.user import User
-from src.app.exc.user import UserNotFoud
-from src.app.schemas.chat_direct import (
+from app.crud.user import user_crud
+from app.deps.auth import auth_user
+from app.crud.chat_direct import chat_direct_crud
+from app.models.user import User
+from app.exc.user import UserNotFoud
+from app.schemas.chat_direct import (
     ChatDirectResponse, CreateDirectChat,
 )
-from src.app.core.db import db
+from app.core.db import db
 
 router = APIRouter(prefix="/chat/direct")
 

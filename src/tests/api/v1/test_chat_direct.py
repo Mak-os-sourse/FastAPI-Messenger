@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
 
-from src.tests.factories.user import UserFactory
-from src.tests.fake import fake
+from tests.factories.user import UserFactory
+from tests.fake import fake
 
 async def test_create_chat_direct(session: AsyncSession, client: AsyncClient, auth_user):
     user = await UserFactory()

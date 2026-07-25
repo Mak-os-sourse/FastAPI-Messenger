@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import update
 
-from src.app.crud.base import BaseCRUD
-from src.app.models.chat_relationships import ChatRelationships
+from app.crud.base import BaseCRUD
+from app.models.chat_relationships import ChatRelationships
 
 class ChatRelationshipsCrud(BaseCRUD):
     def __init__(self):

@@ -1,7 +1,7 @@
-from src.tests.factories.base import BaseFactory
+from tests.factories.base import BaseFactory
 
 from factory.faker import Faker
-from src.app.models.chat_group import ChatGroup
+from app.models.chat_group import ChatGroup
 
 class ChatGroupFactory(BaseFactory):
     class Meta:

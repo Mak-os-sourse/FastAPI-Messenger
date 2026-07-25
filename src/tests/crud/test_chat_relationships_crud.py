@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.crud.chat_relationships import chat_relationships_crud
-from src.tests.factories.chat_relationships import ChatRelationshipsFactory
+from app.crud.chat_relationships import chat_relationships_crud
+from tests.factories.chat_relationships import ChatRelationshipsFactory
 
 async def test_extended_rights_chat(session: AsyncSession):
     chat = await ChatRelationshipsFactory.create()

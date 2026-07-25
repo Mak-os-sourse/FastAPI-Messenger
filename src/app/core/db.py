@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import Pool
 
-from src.app.core.base import Base
+from app.core.base import Base
 
 class DB:
     def __init__(self):

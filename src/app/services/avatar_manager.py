@@ -1,8 +1,8 @@
 import base64
 
-from src.app.aws import S3Storage
-from src.app.tasks.file import save_convert
-from src.app.core.settings import settings
+from app.aws import S3Storage
+from app.tasks.file import save_convert
+from app.core.settings import settings
 
 class AvatarManager:
     async def save(

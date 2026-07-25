@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 
-from src.app.core.base import Base
+from app.core.base import Base
 
 class Invitation(Base):
     __tablename__ = "Invitations"

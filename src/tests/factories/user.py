@@ -1,7 +1,7 @@
-from src.tests.factories.base import BaseFactory
+from tests.factories.base import BaseFactory
 
 from factory.faker import Faker
-from src.app.models.user import User
+from app.models.user import User
 
 class UserFactory(BaseFactory):
     class Meta:

@@ -1,9 +1,9 @@
-from src.tests.factories.base import BaseFactory
+from tests.factories.base import BaseFactory
 
 from factory import SubFactory, LazyAttribute
-from src.tests.factories.user import UserFactory
-from src.tests.factories.chat_group import ChatGroupFactory
-from src.app.models.chat_relationships import ChatRelationships
+from tests.factories.user import UserFactory
+from tests.factories.chat_group import ChatGroupFactory
+from app.models.chat_relationships import ChatRelationships
 
 class ChatRelationshipsFactory(BaseFactory):
     class Meta:

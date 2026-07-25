@@ -2,14 +2,14 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from redis.asyncio import Redis
 
-from main import app
-from src.tests.factories.base import _session_manager
-from src.app.core.settings import settings
-from src.app.aws import S3Storage, s3, get_storage
-from src.app.deps.auth import auth_user as auth_user_deps
-from src.app.core.cache import cache
-from src.app.core.db import db
-from src.app.models import *
+from app.main import app
+from tests.factories.base import _session_manager
+from app.core.settings import settings
+from app.aws import S3Storage, s3, get_storage
+from app.deps.auth import auth_user as auth_user_deps
+from app.core.cache import cache
+from app.core.db import db
+from app.models import *
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup():

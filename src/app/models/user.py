@@ -3,7 +3,7 @@ from typing import Literal
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.app.core.base import Base
+from app.core.base import Base
 
 class User(Base):
     __tablename__ = "Users"

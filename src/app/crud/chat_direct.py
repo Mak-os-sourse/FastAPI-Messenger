@@ -1,8 +1,8 @@
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.crud.base import BaseCRUD
-from src.app.models.chat_direct import ChatDirect
+from app.crud.base import BaseCRUD
+from app.models.chat_direct import ChatDirect
 
 class ChatDirectCrud(BaseCRUD):
     def __init__(self):

@@ -1,5 +1,4 @@
 import pyotp
-from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 from httpx import AsyncClient
 

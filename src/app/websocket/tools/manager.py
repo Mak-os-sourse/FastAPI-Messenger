@@ -12,7 +12,7 @@ class ConnectionManager:
         self.active_connections.remove(websocket)
         
     async def receive_json(self, websocket: WebSocket) -> dict:
-        await websocket.receive_json()
+        return await websocket.receive_json()
         
     async def send_personal_message(self, data: str, websocket: WebSocket):
             await websocket.send(data)

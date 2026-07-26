@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt import PyJWTError
 
-from app.websocket.dispatcher import WSDpends
-from app.schemas.auth import WSToken
 from app.exc.auth import InvalidToken, WSInvalidToken
+from app.websocket.tools import WSDpends
 from app.services.security import token
+from app.schemas.auth import WSToken
 from app.crud.user import user_crud
 from app.core.db import db
 

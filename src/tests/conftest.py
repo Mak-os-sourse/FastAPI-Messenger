@@ -1,5 +1,6 @@
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from httpx_ws.transport import ASGIWebSocketTransport
 from redis.asyncio import Redis
 
 from app.main import app
@@ -39,6 +40,15 @@ async def session():
 async def storage():
     yield S3Storage(s3.client)
   
+@pytest_asyncio.fixture()
+async def ws_client(session, redis, storage):
+    app.dependency_overrides[db.get_session] = lambda: session
+    app.dependency_overrides[cache.get_redis] = lambda: redis
+    app.dependency_overrides[get_storage] = lambda: storage
+    async with AsyncClient(transport=ASGIWebSocketTransport(app=app)) as client:
+        yield client
+    app.dependency_overrides.clear()
+
 @pytest_asyncio.fixture()
 async def client(session, redis, storage):
     app.dependency_overrides[db.get_session] = lambda: session

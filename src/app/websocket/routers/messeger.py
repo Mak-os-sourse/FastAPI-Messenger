@@ -17,5 +17,7 @@ async def new_messege(
     user: User = WSDpends(ws_auth_user),
     session: AsyncSession = WSDpends(db.get_session)
 ):
-    messege = await messege_crud.add(session, chat_id=data.chat_id, user_id=user.id, content=data.content)
-    return messege.model_dump()
+    messege = await messege_crud.add(session=session, chat_id=data.chat_id, user_id=user.id, content=data.content)
+    result = messege.model_dump()
+    result.pop("user")
+    return result

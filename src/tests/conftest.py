@@ -1,13 +1,16 @@
 import pytest_asyncio
+from httpx_ws import aconnect_ws
+from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 from httpx_ws.transport import ASGIWebSocketTransport
 from redis.asyncio import Redis
 
 from app.main import app
+from app.deps.auth import ws_auth_user, auth_user  as auth_user_deps
 from tests.factories.base import _session_manager
-from app.core.settings import settings
 from app.aws import S3Storage, s3, get_storage
-from app.deps.auth import auth_user as auth_user_deps
+from app.core.settings import settings
+from app.websocket.ws import dp
 from app.core.cache import cache
 from app.core.db import db
 from app.models import *
@@ -42,12 +45,13 @@ async def storage():
   
 @pytest_asyncio.fixture()
 async def ws_client(session, redis, storage):
-    app.dependency_overrides[db.get_session] = lambda: session
-    app.dependency_overrides[cache.get_redis] = lambda: redis
-    app.dependency_overrides[get_storage] = lambda: storage
+    dp.dependency_overrides[db.get_session] = lambda: session
+    dp.dependency_overrides[cache.get_redis] = lambda: redis
+    dp.dependency_overrides[get_storage] = lambda: storage
     async with AsyncClient(transport=ASGIWebSocketTransport(app=app)) as client:
-        yield client
-    app.dependency_overrides.clear()
+        async with aconnect_ws("http://localhost:8000/ws", client) as ws:
+            yield ws
+    dp.dependency_overrides.clear()
 
 @pytest_asyncio.fixture()
 async def client(session, redis, storage):
@@ -62,4 +66,5 @@ async def client(session, redis, storage):
 async def auth_user():
     def func(user: User):
         app.dependency_overrides[auth_user_deps] = lambda: user
+        dp.dependency_overrides[ws_auth_user] = lambda: user
     yield func

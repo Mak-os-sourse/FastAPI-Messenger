@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 
-from app.exc.webscoket import WebSocketError
+from app.websocket.tools.exc import WebSocketError
 
 class WSInvalidToken(WebSocketError):
     def __init__(self):

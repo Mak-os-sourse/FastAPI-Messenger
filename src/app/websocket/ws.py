@@ -1,8 +1,9 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.websocket.routers import router as dp_router
-from app.websocket.tools import dp, manager
+from app.websocket.tools import Dispatcher, manager
 
+dp = Dispatcher()
 dp.include_routers(dp_router)
 router = APIRouter()
 
@@ -12,7 +13,6 @@ async def ws_endpoint(ws: WebSocket):
     try:
         while True:
             data = await manager.receive_json(ws)
-            print(data["action"])
             if data is None:
                await manager.disconnect(ws)
                return

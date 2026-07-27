@@ -14,7 +14,7 @@ class MessegeCrud(BaseCRUD):
         content: str,
     ) -> Messege:
         return await super().add(
-            sesssion=session,
+            session=session,
             chat_id=chat_id,
             user_id=user_id,
             content=content,

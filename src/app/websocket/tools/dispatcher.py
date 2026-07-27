@@ -1,13 +1,12 @@
 import json
 from fastapi import WebSocket
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from dataclasses import dataclass
-from typing import AsyncGenerator
-from typing import Coroutine, AsyncGenerator
+from typing import Coroutine
 
 from app.websocket.tools.params import params
-from app.schemas.websocket import WebSocketResponse, WebSocketRequest
-from app.exc.webscoket import WebSocketError, ActionError
+from app.websocket.tools.schemas import WebSocketResponse, WebSocketRequest
+from app.websocket.tools.exc import WebSocketError, ActionError
 from app.websocket.tools.manager import manager
 
 @dataclass
@@ -30,6 +29,10 @@ class WSRouter:
         self.routers.update(dp.routers)
 
 class Dispatcher(WSRouter):
+    def __init__(self):
+        super().__init__()
+        self.dependency_overrides = {}
+   
     async def execute_request(self, ws: WebSocket, data: dict) -> None:
         deps = []
         
@@ -40,29 +43,23 @@ class Dispatcher(WSRouter):
             if func is None:
                 raise ActionError()
             
-            kwargs, deps = await params.get_kwargs(func=func, data=data)
+            kwargs, deps = await params.get_kwargs(func=func, data=data, dependency_overrides=self.dependency_overrides)
             result_router = await func(**kwargs)
-            if isinstance(result, BaseModel):
-                result = result_router.model_dump_json()
-            else:
-                result = json.dump(result_router)
+            if isinstance(result_router, BaseModel):
+                result_router = result_router.model_dump_json()
             
-            model = WebSocketResponse(action=data["action"], status="success", data=result)
+            model = WebSocketResponse(action=data["action"], status="success", data=result_router)
             await manager.send_personal_message(data=model.model_dump_json(), websocket=ws)
         except Exception as e:
             if isinstance(e, WebSocketError):
                 name_error = e.name
+            elif isinstance(e, ValidationError):
+                name_error = "ValidationError"
             else:
                 name_error = "ServerError"
             model = WebSocketResponse(action=data["action"], status="error", messege=str(e), error=name_error)
             await manager.send_personal_message(data=model.model_dump_json(), websocket=ws)
-            raise e
+            print(e)
+            # raise e
 
-        await self._close_deps(deps)
-       
-    async def _close_deps(self, deps: list[AsyncGenerator]) -> None:
-        for item in deps:
-            if isinstance(item, AsyncGenerator):
-                await anext(item)
-    
-dp = Dispatcher()
+        await params.close_deps(deps)

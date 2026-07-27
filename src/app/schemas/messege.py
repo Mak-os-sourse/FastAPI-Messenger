@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 
-from app.schemas.websocket import WebSocketRequest
+from app.websocket.tools.schemas import WebSocketRequest
 
 class NewMessegeRequest(WebSocketRequest):
+    token: str
     chat_id: int
     content: str
 

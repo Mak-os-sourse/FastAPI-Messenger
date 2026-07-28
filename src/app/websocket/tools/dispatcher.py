@@ -38,28 +38,30 @@ class Dispatcher(WSRouter):
         
         try:
             model = self.routers.get(data["action"])
+            if model is None:
+                raise ActionError()
             model.request_model(**data)
             func = model.func
-            if func is None:
-                raise ActionError()
             
-            kwargs, deps = await params.get_kwargs(func=func, data=data, dependency_overrides=self.dependency_overrides)
+            kwargs, deps = await params.get_signature_data(func=func, data=data, dependency_overrides=self.dependency_overrides)
             result_router = await func(**kwargs)
             if isinstance(result_router, BaseModel):
-                result_router = result_router.model_dump_json()
+                result_router = result_router.model_dump()
             
             model = WebSocketResponse(action=data["action"], status="success", data=result_router)
             await manager.send_personal_message(data=model.model_dump_json(), websocket=ws)
         except Exception as e:
-            if isinstance(e, WebSocketError):
-                name_error = e.name
-            elif isinstance(e, ValidationError):
-                name_error = "ValidationError"
-            else:
-                name_error = "ServerError"
+            name_error = self._get_name_error(e)
             model = WebSocketResponse(action=data["action"], status="error", messege=str(e), error=name_error)
             await manager.send_personal_message(data=model.model_dump_json(), websocket=ws)
-            print(e)
-            # raise e
+            raise e
 
         await params.close_deps(deps)
+        
+    def _get_name_error(self, e: Exception):
+        if isinstance(e, WebSocketError):
+            return e.name
+        elif isinstance(e, ValidationError):
+            return "ValidationError"
+        else:
+            return"ServerError"

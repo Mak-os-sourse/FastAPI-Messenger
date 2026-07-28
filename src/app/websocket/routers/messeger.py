@@ -2,7 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.websocket.tools import WSRouter, WSDpends
 from app.schemas.messege import (
-    NewMessege, NewMessegeRequest
+    NewMessege, NewMessegeRequest,
+    MessegeResponse
 )
 from app.crud.messege import messege_crud
 from app.deps.auth import ws_auth_user
@@ -18,6 +19,4 @@ async def new_messege(
     session: AsyncSession = WSDpends(db.get_session)
 ):
     messege = await messege_crud.add(session=session, chat_id=data.chat_id, user_id=user.id, content=data.content)
-    result = messege.model_dump()
-    result.pop("user")
-    return result
+    return MessegeResponse(**messege.model_dump())

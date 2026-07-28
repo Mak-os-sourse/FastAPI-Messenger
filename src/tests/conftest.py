@@ -1,8 +1,9 @@
 import pytest_asyncio
-from httpx_ws import aconnect_ws
-from fastapi.testclient import TestClient
+from typing import AsyncGenerator
 from httpx import ASGITransport, AsyncClient
+from contextlib import asynccontextmanager
 from httpx_ws.transport import ASGIWebSocketTransport
+from httpx_ws import aconnect_ws, AsyncWebSocketSession
 from redis.asyncio import Redis
 
 from app.main import app
@@ -48,10 +49,13 @@ async def ws_client(session, redis, storage):
     dp.dependency_overrides[db.get_session] = lambda: session
     dp.dependency_overrides[cache.get_redis] = lambda: redis
     dp.dependency_overrides[get_storage] = lambda: storage
-    async with AsyncClient(transport=ASGIWebSocketTransport(app=app)) as client:
-        async with aconnect_ws("http://localhost:8000/ws", client) as ws:
-            yield ws
-    dp.dependency_overrides.clear()
+    @asynccontextmanager
+    async def ws() -> AsyncGenerator[AsyncWebSocketSession, None]:
+        async with AsyncClient(transport=ASGIWebSocketTransport(app=app), base_url="http://test") as client:
+            async with aconnect_ws("/ws", client) as ws:
+                yield ws
+            dp.dependency_overrides.clear()    
+    return ws
 
 @pytest_asyncio.fixture()
 async def client(session, redis, storage):

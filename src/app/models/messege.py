@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
+import time
 
 from app.core.base import Base
 
@@ -10,5 +11,6 @@ class Messege(Base):
     chat_id: Mapped[int] = mapped_column()
     user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     content: Mapped[str] = mapped_column()
+    create_at: Mapped[int] = mapped_column(default=lambda: int(time.time()))
     
     user: Mapped["User"] = relationship(lazy="selectin")

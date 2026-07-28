@@ -15,7 +15,7 @@ class ConnectionManager:
         return await websocket.receive_json()
         
     async def send_personal_message(self, data: str, websocket: WebSocket):
-            await websocket.send(data)
+            await websocket.send_text(data)
             
     async def broadcast(self, message: str):
         for connection in self.active_connections:

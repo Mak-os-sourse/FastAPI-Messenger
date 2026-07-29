@@ -1,10 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
 
+from app.models.chat_relationships import ChatRelationships
 from app.crud.chat_relationships import chat_relationships_crud
 from tests.factories.chat_relationships import ChatRelationshipsFactory
 from tests.factories.invitation import InvitationFactory
-from tests.factories.chat_group import ChatGroupFactory
 from tests.factories.user import UserFactory
 from app.models.chat_group import ChatGroup
 from app.core.settings import settings
@@ -163,7 +163,7 @@ async def test_accept_join_chat_group(session: AsyncSession, client: AsyncClient
     assert result["success"]
     assert data is not None
     
-async def test_extended_rights_chat_group(session: AsyncSession, client: AsyncClient, auth_user):
+async def test_extended_rights_chat_group(client: AsyncClient, auth_user):
     chat_one = await ChatRelationshipsFactory.create(is_admin=True)
     chat_two = await ChatRelationshipsFactory.create(is_admin=False, chat=chat_one.chat)
     auth_user(chat_one.user)
@@ -179,3 +179,19 @@ async def test_extended_rights_chat_group(session: AsyncSession, client: AsyncCl
     assert res.status_code == 200
     assert result["success"]
     assert chat_two.is_admin
+
+async def test_leave_chat_group(session: AsyncSession, client: AsyncClient, auth_user):
+    chat = await ChatRelationshipsFactory.create(is_admin=False)
+    auth_user(chat.user)
+
+    res = await client.post(
+        "/chat/group/leave",
+        json={"chat_id": chat.chat_id},
+    )
+    
+    data = await session.get(ChatRelationships, chat.id)
+    result = res.json()
+    
+    assert res.status_code == 200
+    assert result["success"]
+    assert data is None

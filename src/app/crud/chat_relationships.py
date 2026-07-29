@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import update
+from sqlalchemy import update, delete
 
 from app.crud.base import BaseCRUD
 from app.models.chat_relationships import ChatRelationships
@@ -28,6 +28,15 @@ class ChatRelationshipsCrud(BaseCRUD):
                 ChatRelationships.chat_id == chat_id
             ) \
             .values(is_admin=True)
+        await session.execute(stmt)
+        await session.flush()
+    
+    async def leave(self, session: AsyncSession, user_id: int, chat_id: int) -> None:
+        stmt = delete(ChatRelationships) \
+            .where(
+                ChatRelationships.user_id == user_id,
+                ChatRelationships.chat_id == chat_id
+            )
         await session.execute(stmt)
         await session.flush()
 

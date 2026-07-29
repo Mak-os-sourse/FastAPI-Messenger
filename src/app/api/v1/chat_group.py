@@ -115,3 +115,12 @@ async def extended_rights(
 ):
     await chat_relationships_crud.extended_rights(session, user_id=user_id, chat_id=chat.chat_id)
     return Success(success=True)
+
+@router.post("/leave", response_model=Success)
+async def extended_rights(
+    user: User = Depends(auth_user),
+    chat_id: int = Body(embed=True),
+    session: AsyncSession = Depends(db.get_session),
+):
+    await chat_relationships_crud.leave(session, chat_id=chat_id, user_id=user.id)
+    return Success(success=True)

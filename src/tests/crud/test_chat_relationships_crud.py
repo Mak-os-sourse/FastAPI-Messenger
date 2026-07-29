@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.chat_relationships import ChatRelationships
 from app.crud.chat_relationships import chat_relationships_crud
 from tests.factories.chat_relationships import ChatRelationshipsFactory
 
@@ -9,3 +10,12 @@ async def test_extended_rights_chat(session: AsyncSession):
     await chat_relationships_crud.extended_rights(session, user_id=chat.user_id, chat_id=chat.chat_id)
     
     assert chat.is_admin
+
+async def test_leave_chat(session: AsyncSession):
+    chat = await ChatRelationshipsFactory.create()
+    
+    await chat_relationships_crud.leave(session, user_id=chat.user_id, chat_id=chat.chat_id)
+    
+    data = await session.get(ChatRelationships, chat.id)
+    
+    assert data is None

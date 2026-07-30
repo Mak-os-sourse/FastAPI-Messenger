@@ -1,8 +1,9 @@
 import magic
-from fastapi import UploadFile, File
+from fastapi import File, UploadFile
 
-from app.exc.file import UnsupportedMediaType
 from app.core.settings import settings
+from app.exc.file import UnsupportedMediaType
+
 
 async def get_image(image: UploadFile = File()):
     format = magic.from_buffer(await image.read(), mime=True)

@@ -1,8 +1,9 @@
+from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import update, delete
 
 from app.crud.base import BaseCRUD
 from app.models.chat_relationships import ChatRelationships
+
 
 class ChatRelationshipsCrud(BaseCRUD):
     def __init__(self):

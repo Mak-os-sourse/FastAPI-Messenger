@@ -1,14 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.websocket.tools import WSRouter, WSDpends
-from app.schemas.messege import (
-    NewMessege, NewMessegeRequest,
-    MessegeResponse
-)
+from app.core.db import db
 from app.crud.messege import messege_crud
 from app.deps.auth import ws_auth_user
 from app.models.user import User
-from app.core.db import db
+from app.schemas.messege import MessegeResponse, NewMessege, NewMessegeRequest
+from app.websocket.tools import WSDpends, WSRouter
 
 router = WSRouter()
 

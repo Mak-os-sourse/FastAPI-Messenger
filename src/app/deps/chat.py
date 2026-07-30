@@ -1,12 +1,13 @@
 from fastapi import Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.chat_relationships import chat_relationships_crud
-from app.models.chat_relationships import ChatRelationships
-from app.exc.chat import UserNotAdminInChat
-from app.deps.auth import auth_user
-from app.models.user import User
 from app.core.db import db
+from app.crud.chat_relationships import chat_relationships_crud
+from app.deps.auth import auth_user
+from app.exc.chat import UserNotAdminInChat
+from app.models.chat_relationships import ChatRelationships
+from app.models.user import User
+
 
 async def get_chat_admin(
     chat_id: int = Query(),

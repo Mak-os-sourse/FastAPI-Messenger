@@ -1,7 +1,9 @@
-import jwt
 import time
 
+import jwt
+
 from app.core.settings import settings
+
 
 class Token:
     def create_tokens(self, id: int,  username: str, email: str) -> tuple[str, str]:

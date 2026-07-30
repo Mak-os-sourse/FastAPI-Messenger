@@ -1,7 +1,10 @@
-import ffmpeg, asyncio
+import asyncio
 from io import BytesIO
 
+import ffmpeg
+
 from app.exc.ffmpeg_tools import FFmpegToolException
+
 
 class FormatFile:
     png: str = "image2pipe"

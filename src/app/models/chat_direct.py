@@ -1,8 +1,10 @@
 import time
+
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.base import Base
+
 
 class ChatDirect(Base):
     __tablename__ = "ChatDirects"

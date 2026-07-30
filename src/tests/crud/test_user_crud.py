@@ -1,9 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.fake import fake
-from app.models.user import User
 from app.crud.user import user_crud
+from app.models.user import User
 from tests.factories.user import UserFactory
+from tests.fake import fake
+
 
 async def test_add_user(session: AsyncSession):
     user = await user_crud.add(

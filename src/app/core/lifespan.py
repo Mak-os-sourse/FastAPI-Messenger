@@ -1,11 +1,13 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from app.models import *
+from fastapi import FastAPI
+
 from app.aws.s3 import s3
-from app.core.db import db
 from app.core.cache import cache
+from app.core.db import db
 from app.core.settings import settings
+from app.models import *
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

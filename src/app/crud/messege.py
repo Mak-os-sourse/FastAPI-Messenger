@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.base import BaseCRUD
 from app.models.messege import Messege
 
+
 class MessegeCrud(BaseCRUD):
     def __init__(self):
         super().__init__(Messege)

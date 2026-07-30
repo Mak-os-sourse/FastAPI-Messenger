@@ -1,5 +1,8 @@
-import pyotp, qrcode
 from io import BytesIO
+
+import pyotp
+import qrcode
+
 
 class Totp:
     def gen_secret_key(self) -> str:

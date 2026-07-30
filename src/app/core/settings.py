@@ -1,6 +1,8 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+
+import dotenv
 from pydantic import BaseModel
-import dotenv, os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 if os.getenv("TEST") is not None:
     dotenv.load_dotenv("settings.test.env")

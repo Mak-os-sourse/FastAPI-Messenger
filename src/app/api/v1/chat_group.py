@@ -1,27 +1,31 @@
-from fastapi import APIRouter, Depends, Body, Query, Response, UploadFile
-from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 
-from app.crud.chat_relationships import chat_relationships_crud
-from app.models.chat_relationships import ChatRelationships
-from app.services.avatar_manager import avatar_manager
-from app.crud.invitation import invitation_crud
-from app.crud.chat_group import chat_group_crud
+from fastapi import APIRouter, Body, Depends, Query, Response, UploadFile
+from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.aws import S3Storage, get_storage
-from app.deps.chat import get_chat_admin
-from app.core.settings import settings
-from app.deps.file import get_image
-from app.deps.auth import auth_user
-from app.schemas.base import Success
-from app.models.user import User
-from app.exc.chat import (
-    ChatNotFound, InvitationNotFound
-)
-from app.schemas.chat_group import (
-    ChatGroupResponse, CreateGroupChat,
-    UpdateChat, AcceptJoin
-)
+from app.core.cache import cache
 from app.core.db import db
+from app.core.settings import settings
+from app.crud.chat_group import chat_group_crud
+from app.crud.chat_relationships import chat_relationships_crud
+from app.crud.invitation import invitation_crud
+from app.deps.auth import auth_user
+from app.deps.chat import get_chat_admin
+from app.deps.file import get_image
+from app.exc.chat import ChatNotFound, InvitationNotFound
+from app.models.chat_relationships import ChatRelationships
+from app.models.user import User
+from app.schemas.base import Success
+from app.schemas.chat_group import (
+    AcceptJoin,
+    ChatGroupResponse,
+    CreateGroupChat,
+    UpdateChat,
+)
+from app.services.avatar_manager import avatar_manager
+from app.services.notification import notification
 
 router = APIRouter(prefix="/chat/group")
 
@@ -29,10 +33,12 @@ router = APIRouter(prefix="/chat/group")
 async def creat_chat(
     user: User = Depends(auth_user),
     create_chat: CreateGroupChat = Body(),
+    redis: Redis = Depends(cache.get_redis),
     session: AsyncSession = Depends(db.get_session),
 ):
     chat = await chat_group_crud.add(session, **create_chat.model_dump())
     await chat_relationships_crud.add(session, chat_id=chat.id, user_id=user.id, is_admin=True)
+    await notification.subscribe(redis, user_id=user.id, chat_ids=[chat.id])
     return ChatGroupResponse(**chat.model_dump())
 
 @router.put("/update", response_model=ChatGroupResponse)
@@ -73,6 +79,7 @@ async def delete_chat(
     session: AsyncSession = Depends(db.get_session),
 ):
     await chat_group_crud.delete(session, id=chat.id)
+    await notification.unsubscribe_all(chat_ids=[chat.chat_id])
     return Success(success=True)
 
 @router.post("/join", response_model=Success)
@@ -97,6 +104,7 @@ async def join_user(
 async def accept_join(
     chat: ChatRelationships = Depends(get_chat_admin),
     accept_join: AcceptJoin = Body(),
+    redis: Redis = Depends(cache.get_redis),
     session: AsyncSession = Depends(db.get_session),
 ):
     invitation = await invitation_crud.get_one(session, id=accept_join.invitation_id)
@@ -105,6 +113,7 @@ async def accept_join(
         raise InvitationNotFound()
     
     await chat_relationships_crud.add(session, chat_id=chat.chat_id, user_id=invitation.user_id, is_admin=accept_join.is_admin)
+    await notification.subscribe(redis, user_id=chat.user_id, chat_ids=[chat.chat_id])
     return Success(success=True)
 
 @router.post("/extended-rights", response_model=Success)
@@ -123,4 +132,5 @@ async def extended_rights(
     session: AsyncSession = Depends(db.get_session),
 ):
     await chat_relationships_crud.leave(session, chat_id=chat_id, user_id=user.id)
+    notification.unsubscribe(user_id=user.id, chat_ids=[chat_id])
     return Success(success=True)

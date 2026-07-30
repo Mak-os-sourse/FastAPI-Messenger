@@ -1,6 +1,7 @@
 from aioboto3 import Session
 from types_aiobotocore_s3 import S3Client
 
+
 class S3:
     async def init(self, url: str, user: str, password: str):
         self._session = Session()

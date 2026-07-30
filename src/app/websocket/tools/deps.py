@@ -1,5 +1,6 @@
+from collections.abc import AsyncGenerator, Coroutine
 from dataclasses import dataclass
-from typing import Coroutine, AsyncGenerator
+
 
 @dataclass
 class WSDependsParams:

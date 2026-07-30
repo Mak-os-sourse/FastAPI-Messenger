@@ -1,12 +1,12 @@
 import pyotp
-from redis.asyncio import Redis
 from httpx import AsyncClient
+from redis.asyncio import Redis
 
-from tests.fake import fake
 from app.core.settings import settings
-from app.services.security import hash_lib
+from app.services.security import hash_lib, token, totp
 from tests.factories.user import UserFactory
-from app.services.security import totp, token
+from tests.fake import fake
+
 
 async def test_update_token(client: AsyncClient):
     user = await UserFactory.create()
@@ -44,7 +44,7 @@ async def test_update_token_error_token(client: AsyncClient):
     
     res = await client.post(
         "auth/update-token",
-        headers={"Authorization": f"Bearer w5a234fa"},
+        headers={"Authorization": "Bearer w5a234fa"},
         cookies={"token": refresh},
     )
     

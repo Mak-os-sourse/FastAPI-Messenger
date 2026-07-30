@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 from app.websocket.tools.schemas import WebSocketRequest
 
+
 class Messege(BaseModel):
     chat_id: int
     user_id: int

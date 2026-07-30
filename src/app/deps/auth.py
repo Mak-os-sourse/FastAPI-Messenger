@@ -1,14 +1,14 @@
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import PyJWTError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.exc.auth import InvalidToken, WSInvalidToken
-from app.websocket.tools import WSDpends
-from app.services.security import token
-from app.schemas.auth import WSToken
-from app.crud.user import user_crud
 from app.core.db import db
+from app.crud.user import user_crud
+from app.exc.auth import InvalidToken, WSInvalidToken
+from app.schemas.auth import WSToken
+from app.services.security import token
+from app.websocket.tools import WSDpends
 
 security = HTTPBearer()
 

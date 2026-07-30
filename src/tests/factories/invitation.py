@@ -1,9 +1,9 @@
-from tests.factories.base import BaseFactory
+from factory import LazyAttribute, SubFactory
 
-from factory import SubFactory, LazyAttribute
-from tests.factories.user import UserFactory
-from tests.factories.chat_group import ChatGroupFactory
 from app.models.invitation import Invitation
+from tests.factories.base import BaseFactory
+from tests.factories.user import UserFactory
+
 
 class InvitationFactory(BaseFactory):
     class Meta:

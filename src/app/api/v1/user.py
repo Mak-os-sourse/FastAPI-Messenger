@@ -1,20 +1,22 @@
-from fastapi import APIRouter, Depends, Body, Query, UploadFile, Response
-from sqlalchemy.ext.asyncio import AsyncSession
 from pathlib import Path
 
-from app.services.avatar_manager import avatar_manager
+from fastapi import APIRouter, Body, Depends, Query, Response, UploadFile
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.aws import S3Storage, get_storage
+from app.core.db import db
 from app.core.settings import settings
-from app.deps.file import get_image
-from app.deps.auth import auth_user
 from app.crud.user import user_crud
+from app.deps.auth import auth_user
+from app.deps.file import get_image
+from app.models.user import User
 from app.schemas.base import Success
 from app.schemas.user import (
-    UserResponse, Enable2FA,
+    Enable2FA,
     UpdateData,
+    UserResponse,
 )
-from app.models.user import User
-from app.core.db import db
+from app.services.avatar_manager import avatar_manager
 
 router = APIRouter(prefix="/user")
 

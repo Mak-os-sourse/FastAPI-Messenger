@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
 from app.api.v1.auth import router as auth
-from app.api.v1.user import router as user
+from app.api.v1.chat_direct import router as chat_diirect
 from app.api.v1.chat_direct import router as chat_direct
 from app.api.v1.chat_group import router as chat_group
-from app.api.v1.chat_direct import router as chat_diirect
+from app.api.v1.user import router as user
 
 router = APIRouter()
 router.include_router(auth)

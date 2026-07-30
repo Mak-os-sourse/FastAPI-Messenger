@@ -1,5 +1,13 @@
 from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
+
+
+class WebSocketNotificationResponse(BaseModel):
+    action: str
+    type: str
+    messege: str | None = None
+    data: dict = {}
 
 class WebSocketRequest(BaseModel):
     action: str

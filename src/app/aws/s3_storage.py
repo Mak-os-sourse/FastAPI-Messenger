@@ -1,6 +1,8 @@
-from types_aiobotocore_s3 import S3Client
-from botocore.exceptions import ClientError
 from io import BytesIO
+
+from botocore.exceptions import ClientError
+from types_aiobotocore_s3 import S3Client
+
 
 class S3Storage:
     def __init__(self, client: S3Client):

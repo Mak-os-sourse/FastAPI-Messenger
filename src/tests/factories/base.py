@@ -1,6 +1,7 @@
 from factory.alchemy import SQLAlchemyModelFactory
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 class SessionManager:
     session: AsyncSession
 

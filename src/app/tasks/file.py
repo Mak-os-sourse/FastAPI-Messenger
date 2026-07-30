@@ -1,10 +1,12 @@
 import base64
+
 from taskiq import TaskiqDepends
 
+from app.aws import S3Storage, get_storage
 from app.core.task_broker import broker
-from app.aws import get_storage, S3Storage
 from app.exc.file import UnsupportedMediaFormat
-from app.services.ffmpeg_tools import ffmpeg_tools, FormatFile
+from app.services.ffmpeg_tools import FormatFile, ffmpeg_tools
+
 
 @broker.task
 async def save_convert(

@@ -1,15 +1,16 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.chat_relationships import ChatRelationships
+from app.aws import S3Storage
+from app.core.settings import settings
 from app.crud.chat_relationships import chat_relationships_crud
+from app.models.chat_group import ChatGroup
+from app.models.chat_relationships import ChatRelationships
 from tests.factories.chat_relationships import ChatRelationshipsFactory
 from tests.factories.invitation import InvitationFactory
 from tests.factories.user import UserFactory
-from app.models.chat_group import ChatGroup
-from app.core.settings import settings
-from app.aws import S3Storage
 from tests.fake import fake
+
 
 async def test_create_chat_group(session: AsyncSession, client: AsyncClient, auth_user):
     user = await UserFactory.create()

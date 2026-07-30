@@ -1,4 +1,5 @@
-from redis.asyncio import Redis, ConnectionPool
+from redis.asyncio import ConnectionPool, Redis
+
 
 class Cache:
     def init(self, url: str):

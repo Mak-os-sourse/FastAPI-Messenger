@@ -1,33 +1,36 @@
-from fastapi import APIRouter, Body, Depends, Response, Cookie
-from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Body, Cookie, Depends, Response
 from fastapi.responses import Response
-from redis.asyncio import Redis
+from fastapi.security import HTTPAuthorizationCredentials
 from jwt import PyJWTError
 from numpy import random
+from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.security import token, hash_lib, totp, black_list
-from app.schemas.base import Success
-from app.schemas.auth import (
-    VerifyCode, LoginUser,
-    LoginUserResponse, JwtToken,
-    VerifyCodeResponse, CreateUser
-)
+from app.core.cache import cache
+from app.core.db import db
+from app.core.settings import settings
+from app.crud.user import user_crud
+from app.deps.auth import security
+from app.deps.user import get_user
 from app.exc.auth import (
+    ErrorGenCode,
     InvalidToken,
     InvalidVerifyCode,
     NotEnable2FA,
     Unauthorized,
-    ErrorGenCode,
 )
 from app.exc.user import UserAlreadyExists
-from app.core.settings import settings
-from app.crud.user import user_crud
-from app.deps.user import get_user
-from app.deps.auth import security
-from app.core.cache import cache
 from app.models.user import User
-from app.core.db import db
+from app.schemas.auth import (
+    CreateUser,
+    JwtToken,
+    LoginUser,
+    LoginUserResponse,
+    VerifyCode,
+    VerifyCodeResponse,
+)
+from app.schemas.base import Success
+from app.services.security import black_list, hash_lib, token, totp
 
 router = APIRouter(prefix="/auth")
 

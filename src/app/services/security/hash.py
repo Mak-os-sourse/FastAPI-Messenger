@@ -2,6 +2,7 @@ import hashlib
 
 from app.core.settings import settings
 
+
 class Hash:
     def hash(self, data: str) -> str:
         string = data + settings.password.salt

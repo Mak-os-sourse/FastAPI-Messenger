@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 
+
 class UnsupportedMediaFormat(Exception):
     def __init__(self):
         super().__init__("Unsupported media format")

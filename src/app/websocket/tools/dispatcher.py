@@ -1,13 +1,14 @@
-import json
+from collections.abc import Coroutine
+from dataclasses import dataclass
+
 from fastapi import WebSocket
 from pydantic import BaseModel, ValidationError
-from dataclasses import dataclass
-from typing import Coroutine
 
-from app.websocket.tools.params import params
-from app.websocket.tools.schemas import WebSocketResponse, WebSocketRequest
-from app.websocket.tools.exc import WebSocketError, ActionError
+from app.websocket.tools.exc import ActionError, WebSocketError
 from app.websocket.tools.manager import manager
+from app.websocket.tools.params import params
+from app.websocket.tools.schemas import WebSocketRequest, WebSocketResponse
+
 
 @dataclass
 class FuncData:

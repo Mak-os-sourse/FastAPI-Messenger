@@ -1,20 +1,23 @@
-import pytest_asyncio
-from typing import AsyncGenerator
-from httpx import ASGITransport, AsyncClient
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from httpx_ws import AsyncWebSocketSession, aconnect_ws
 from httpx_ws.transport import ASGIWebSocketTransport
-from httpx_ws import aconnect_ws, AsyncWebSocketSession
 from redis.asyncio import Redis
 
-from app.main import app
-from app.deps.auth import ws_auth_user, auth_user  as auth_user_deps
-from tests.factories.base import _session_manager
-from app.aws import S3Storage, s3, get_storage
-from app.core.settings import settings
-from app.websocket.ws import dp
+from app.aws import S3Storage, get_storage, s3
 from app.core.cache import cache
 from app.core.db import db
+from app.core.settings import settings
+from app.deps.auth import auth_user as auth_user_deps
+from app.deps.auth import ws_auth_user
+from app.main import app
 from app.models import *
+from app.websocket.ws import dp
+from tests.factories.base import _session_manager
+
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup():
@@ -50,9 +53,9 @@ async def ws_client(session, redis, storage):
     dp.dependency_overrides[cache.get_redis] = lambda: redis
     dp.dependency_overrides[get_storage] = lambda: storage
     @asynccontextmanager
-    async def ws() -> AsyncGenerator[AsyncWebSocketSession, None]:
+    async def ws(user_id: int) -> AsyncGenerator[AsyncWebSocketSession]:
         async with AsyncClient(transport=ASGIWebSocketTransport(app=app), base_url="http://test") as client:
-            async with aconnect_ws("/ws", client) as ws:
+            async with aconnect_ws(f"http://localhost:8000/ws/{user_id}", client) as ws:
                 yield ws
             dp.dependency_overrides.clear()    
     return ws

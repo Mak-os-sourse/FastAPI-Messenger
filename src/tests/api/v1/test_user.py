@@ -1,10 +1,10 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient
 
-from tests.fake import fake
 from app.aws import S3Storage
 from app.core.settings import settings
 from tests.factories.user import UserFactory
+from tests.fake import fake
+
 
 async def test_get_user_me(client: AsyncClient, auth_user):
     user = await UserFactory.create()

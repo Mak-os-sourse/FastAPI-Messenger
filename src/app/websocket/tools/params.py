@@ -1,9 +1,11 @@
 import inspect
-from typing import Coroutine, Any
+from typing import Any
+
 from pydantic import BaseModel
 
 from app.websocket.tools.deps import WSDependsParams
-from app.websocket.tools.manager import manager, ConnectionManager
+from app.websocket.tools.manager import ConnectionManager, manager
+
 
 class RouterParams:
     async def get_signature_data(self, func: Any, data: dict, dependency_overrides: dict) -> tuple[dict, dict]:
@@ -26,7 +28,7 @@ class RouterParams:
         return kwargs, deps
     
     async def close_deps(self, deps: dict) -> None:
-        for item in deps.keys():
+        for item in deps:
             if inspect.isasyncgen(item):
                 await anext(item)
                 item.close()

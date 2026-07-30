@@ -26,6 +26,7 @@ dependencies = [
     "python-multipart>=0.0.32",
     "qrcode>=8.2",
     "redis>=8.0.0",
+    "ruff>=0.16.0",
     "sqlalchemy>=2.0.50",
     "taskiq-redis>=1.2.3",
     "types-aioboto3[essential]>=15.5.0",

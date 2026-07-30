@@ -1,7 +1,8 @@
+from sqlalchemy import BinaryExpression, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import insert, select, update, delete, BinaryExpression
 
 from app.core.base import TModel
+
 
 class BaseCRUD:
     def __init__(self, model: TModel):

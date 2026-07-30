@@ -1,8 +1,10 @@
 from typing import Literal
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import BaseCRUD
 from app.models.chat_group import ChatGroup
+
 
 class ChatCrud(BaseCRUD):
     def __init__(self):

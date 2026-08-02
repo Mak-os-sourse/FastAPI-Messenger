@@ -3,7 +3,7 @@ from fastapi import FastAPI
 
 from app.api.v1 import router as ws_router
 from app.core.lifespan import lifespan
-from app.websocket import router
+from app.websocket.ws import router
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router)

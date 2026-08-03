@@ -5,7 +5,7 @@ from app.crud.base import BaseCRUD
 from app.models.chat_relationships import ChatRelationships
 
 
-class ChatRelationshipsCrud(BaseCRUD):
+class ChatRelationshipsCrud(BaseCRUD[ChatRelationships]):
     def __init__(self):
         super().__init__(ChatRelationships)
     

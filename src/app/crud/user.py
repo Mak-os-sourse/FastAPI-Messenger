@@ -4,7 +4,7 @@ from app.crud.base import BaseCRUD
 from app.models.user import User
 
 
-class UserCrud(BaseCRUD):
+class UserCrud(BaseCRUD[User]):
     def __init__(self):
         super().__init__(User)
         

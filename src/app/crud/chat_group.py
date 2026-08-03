@@ -6,7 +6,7 @@ from app.crud.base import BaseCRUD
 from app.models.chat_group import ChatGroup
 
 
-class ChatCrud(BaseCRUD):
+class ChatCrud(BaseCRUD[ChatGroup]):
     def __init__(self):
         super().__init__(ChatGroup)
         

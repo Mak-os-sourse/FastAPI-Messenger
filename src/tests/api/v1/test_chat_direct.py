@@ -6,7 +6,7 @@ from tests.factories.chat_direct import ChatDirectFactory
 from tests.factories.user import UserFactory
 
 
-async def test_create_chat_direct(session: AsyncSession, client: AsyncClient, auth_user):
+async def test_create_chat_direct(client: AsyncClient, auth_user):
     user = await UserFactory()
     companion = await UserFactory()
     auth_user(user)

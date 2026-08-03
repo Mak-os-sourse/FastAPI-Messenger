@@ -2,13 +2,14 @@ import asyncio
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import cache
 from app.core.db import db
 from app.crud.chat_relationships import chat_relationships_crud
-from app.services.notification import notification
+from app.services.notification_messeges import notification_messeges
 from app.websocket.routers import router as dp_router
-from app.websocket.tools import Dispatcher, manager
+from app.websocket.tools import Dispatcher, WebSocketNotificationResponse, manager
 
 dp = Dispatcher()
 dp.include_routers(dp_router)
@@ -19,7 +20,7 @@ async def ws_endpoint(
     ws: WebSocket,
     user_id: int,
     redis: Redis = Depends(cache.get_redis),
-    session = Depends(db.get_session)):
+    session: AsyncSession = Depends(db.get_session)):
     async def reader(ws: WebSocket):
         while True:
             data = await manager.receive_json(ws)
@@ -30,12 +31,11 @@ async def ws_endpoint(
     
     async def wait_notification(ws: WebSocket, user_id: int):
         data = await chat_relationships_crud.get_all(session, user_id=user_id)
-        chat_ids = [item.chat_id for item in data]
-        await notification.subscribe(redis, user_id=user_id, chat_ids=chat_ids)
-        while True:
-            data = await notification.get_all_messege(user_id)
-            for item in data:
-                ...
+        channel_ids = [item.chat_id for item in data]
+        await notification_messeges.subscribe(redis, user_id=user_id, channel_ids=channel_ids)
+        
+        async for messege in notification_messeges.listen(user_id):
+            await ws.send_text(WebSocketNotificationResponse(**messege).model_dump_json())
 
     await manager.connect(ws)
     try:

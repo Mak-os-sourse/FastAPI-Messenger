@@ -5,7 +5,7 @@ from app.crud.base import BaseCRUD
 from app.models.chat_direct import ChatDirect
 
 
-class ChatDirectCrud(BaseCRUD):
+class ChatDirectCrud(BaseCRUD[ChatDirect]):
     def __init__(self):
         super().__init__(ChatDirect)
         

@@ -4,7 +4,7 @@ from app.crud.base import BaseCRUD
 from app.models.messege import Messege
 
 
-class MessegeCrud(BaseCRUD):
+class MessegeCrud(BaseCRUD[Messege]):
     def __init__(self):
         super().__init__(Messege)
     

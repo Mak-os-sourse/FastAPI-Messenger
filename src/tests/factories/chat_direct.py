@@ -1,4 +1,3 @@
-from factory.faker import Faker
 
 from app.models.chat_direct import ChatDirect
 from tests.factories.base import BaseFactory

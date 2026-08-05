@@ -64,7 +64,7 @@ async def update_avatar(
     chat: ChatRelationships = Depends(get_chat_admin),
     image: UploadFile = Depends(get_image),
 ):
-    suffix = Path(image.filename).suffix
+    suffix = Path(image.filename or "base.png").suffix
     await avatar_manager.save(
         id=chat.chat_id,
         bucket=settings.s3.chat_bucket,
@@ -126,7 +126,7 @@ async def extended_rights(
     return Success(success=True)
 
 @router.post("/leave", response_model=Success)
-async def extended_rights(
+async def leave(
     user: User = Depends(auth_user),
     chat_id: int = Body(embed=True),
     session: AsyncSession = Depends(db.get_session),

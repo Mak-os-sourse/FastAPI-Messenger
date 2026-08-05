@@ -13,11 +13,11 @@ from app.websocket.tools import WSDpends
 security = HTTPBearer()
 
 async def ws_auth_user(
-    data: WSToken,
+    ws_token: WSToken,
     session: AsyncSession = WSDpends(db.get_session),
 ):
     try:
-        data = token.decode(data.token)
+        data = token.decode(ws_token.token)
         
         if data:
             return await user_crud.get_one(session, id=data["id"])

@@ -60,10 +60,10 @@ async def update_token(
         
         await black_list.set(redis, refresh=refresh)
         
-        refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
-        response.set_cookie("token", refresh, httponly=True)
+        refresh_result, access_result = token.create_tokens(id=user.id, username=user.username, email=user.email)
+        response.set_cookie("token", refresh_result, httponly=True)
         
-        return JwtToken(access_token=access) 
+        return JwtToken(access_token=access_result) 
     except PyJWTError:
         raise InvalidToken
 
@@ -135,7 +135,7 @@ async def code_verify(
     key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
     code = await redis.get(key)
 
-    if int(code) == verify_code.code:
+    if int(code or "1") == verify_code.code:
         refresh, access = token.create_tokens(id=user.id, username=user.username, email=user.email)
         response.set_cookie("token", refresh, httponly=True)
                 

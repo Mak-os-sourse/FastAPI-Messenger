@@ -1,5 +1,6 @@
-from collections.abc import Coroutine
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 from fastapi import WebSocket
 from pydantic import BaseModel, ValidationError
@@ -12,7 +13,7 @@ from app.websocket.tools.schemas import WebSocketRequest, WebSocketResponse
 
 @dataclass
 class FuncData:
-    func: Coroutine
+    func: Callable[..., Any]
     request_model: type[BaseModel] | None
 
 class WSRouter:
@@ -34,27 +35,28 @@ class Dispatcher(WSRouter):
         super().__init__()
         self.dependency_overrides = {}
    
-    async def execute_request(self, ws: WebSocket, data: dict) -> None:
-        deps = []
+    async def execute_request(self, ws: WebSocket, data: dict) -> None:  
+        deps: dict[Callable[..., Any], Any] = {}
         
         try:
-            model = self.routers.get(data["action"])
+            model: FuncData | None = self.routers.get(data["action"])
             if model is None:
                 raise ActionError()
-            model.request_model(**data)
-            func = model.func
+            else:
+                model.request_model(**data)
+                func = model.func
             
             kwargs, deps = await params.get_signature_data(func=func, data=data, dependency_overrides=self.dependency_overrides)
             result_router = await func(**kwargs)
             if isinstance(result_router, BaseModel):
                 result_router = result_router.model_dump()
             
-            model = WebSocketResponse(action=data["action"], status="success", data=result_router)
-            await manager.send_personal_message(data=model.model_dump_json(), websocket=ws)
+            result_model = WebSocketResponse(action=data["action"], status="success", data=result_router)
+            await manager.send_personal_message(data=result_model.model_dump_json(), websocket=ws)
         except Exception as e:
             name_error = self._get_name_error(e)
-            model = WebSocketResponse(action=data["action"], status="error", messege=str(e), error=name_error)
-            await manager.send_personal_message(data=model.model_dump_json(), websocket=ws)
+            result_model = WebSocketResponse(action=data["action"], status="error", messege=str(e), error=name_error)
+            await manager.send_personal_message(data=result_model.model_dump_json(), websocket=ws)
             raise e
 
         await params.close_deps(deps)

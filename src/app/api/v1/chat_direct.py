@@ -42,7 +42,7 @@ async def delete_chat(
     chat_id: int = Query(embed=True),
     session: AsyncSession = Depends(db.get_session),
 ):
-    chat = await chat_direct_crud.delete(session, id=chat_id, whereclause=[or_(
+    await chat_direct_crud.delete(session, id=chat_id, whereclause=[or_(
         ChatDirect.user_id_one == user.id,
         ChatDirect.user_id_two == user.id,
     )])

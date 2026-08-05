@@ -21,9 +21,9 @@ async def save_convert(
     if format is None:
         raise UnsupportedMediaFormat()
     
-    file = base64.b64decode(file.encode())
+    file_data = base64.b64decode(file.encode())
     
-    data = await ffmpeg_tools.convert(file=file, output_format=format)
+    data = await ffmpeg_tools.convert(file=file_data, output_format=format)
     
     await storage.upload(bucket=bucket, key=new_key, file=data)
     await storage.delete(bucket=bucket, key=key)

@@ -1,11 +1,12 @@
-from collections.abc import AsyncGenerator, Coroutine
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
 class WSDependsParams:
-    func: AsyncGenerator | Coroutine
+    func: Callable[..., Any]
     use_cache: bool
 
-def WSDpends(func: AsyncGenerator | Coroutine, use_cache: bool = True):
+def WSDpends(func: Callable[..., Any], use_cache: bool = True):
     return WSDependsParams(func=func, use_cache=use_cache)

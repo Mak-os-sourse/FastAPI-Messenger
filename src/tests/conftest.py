@@ -30,11 +30,13 @@ async def setup():
     await cache.close()
     await s3.close()
 
+
 @pytest_asyncio.fixture()
 async def redis():
     async with Redis(connection_pool=cache.pool) as redis:
         yield redis
         await redis.flushall()
+
 
 @pytest_asyncio.fixture()
 async def session():
@@ -43,22 +45,30 @@ async def session():
         yield session
         await session.rollback()
 
+
 @pytest_asyncio.fixture()
 async def storage():
     yield S3Storage(s3.client)
-  
+
+
 @pytest_asyncio.fixture()
 async def ws_client(session, redis, storage):
     dp.dependency_overrides[db.get_session] = lambda: session
     dp.dependency_overrides[cache.get_redis] = lambda: redis
     dp.dependency_overrides[get_storage] = lambda: storage
+
     @asynccontextmanager
     async def ws(user_id: int) -> AsyncGenerator[AsyncWebSocketSession]:
-        async with AsyncClient(transport=ASGIWebSocketTransport(app=app), base_url="http://test") as client:
+        async with AsyncClient(
+            transport=ASGIWebSocketTransport(app=app),
+            base_url="http://test",
+        ) as client:
             async with aconnect_ws(f"http://localhost:8000/ws/{user_id}", client) as ws:
                 yield ws
-            dp.dependency_overrides.clear()    
+            dp.dependency_overrides.clear()
+
     return ws
+
 
 @pytest_asyncio.fixture()
 async def client(session, redis, storage):
@@ -69,9 +79,11 @@ async def client(session, redis, storage):
         yield client
     app.dependency_overrides.clear()
 
+
 @pytest_asyncio.fixture()
 async def auth_user():
     def func(user: User):
         app.dependency_overrides[auth_user_deps] = lambda: user
         dp.dependency_overrides[ws_auth_user] = lambda: user
+
     yield func

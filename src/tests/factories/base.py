@@ -5,12 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class SessionManager:
     session: AsyncSession
 
+
 _session_manager = SessionManager()
+
 
 class BaseFactory(SQLAlchemyModelFactory):
     class Meta:
-        sqlalchemy_session_factory = lambda: _session_manager.session
-    
+        def sqlalchemy_session_factory():
+            return _session_manager.session
+
     @classmethod
     async def create(cls, **kwargs):
         instance = super().create(**kwargs)

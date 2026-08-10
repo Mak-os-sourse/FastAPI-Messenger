@@ -11,13 +11,19 @@ from app.websocket.tools import WSDpends, WSRouter
 
 router = WSRouter()
 
+
 @router.router("NewMessege", request_model=NewMessegeRequest)
 async def new_messege(
     data: NewMessege,
     user: User = WSDpends(ws_auth_user),
     redis: Redis = WSDpends(cache.get_redis),
-    session: AsyncSession = WSDpends(db.get_session)
-):
-    messege = await messege_crud.add(session=session, chat_id=data.chat_id, user_id=user.id, content=data.content)
+    session: AsyncSession = WSDpends(db.get_session),
+) -> MessegeResponse:
+    messege = await messege_crud.add(
+        session=session,
+        chat_id=data.chat_id,
+        user_id=user.id,
+        content=data.content,
+    )
     # await notification_messeges.send_messege(redis, data.chat_id)
     return MessegeResponse(**messege.model_dump())

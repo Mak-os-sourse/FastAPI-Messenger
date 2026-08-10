@@ -9,9 +9,11 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(router)
 app.include_router(ws_router)
 
+
 @app.get("/ping")
-async def pong():
+async def pong() -> str:
     return "pong"
+
 
 if __name__ == "__main__":
     uvicorn.run(app)

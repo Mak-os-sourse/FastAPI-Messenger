@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,18 +11,18 @@ from app.models import *
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     db.init(settings.db.url)
     cache.init(settings.redis.url)
-    
+
     await s3.init(
         url=settings.s3.url,
         user=settings.s3.user,
         password=settings.s3.password,
     )
     await db.metadata_create_all()
-    
+
     yield
-    
+
     await cache.close()
     await s3.close()

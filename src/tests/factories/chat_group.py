@@ -7,7 +7,7 @@ from tests.factories.base import BaseFactory
 class ChatGroupFactory(BaseFactory):
     class Meta:
         model = ChatGroup
-        
+
     type: str = "public"
     name: str = Faker("name")
     description = Faker("text", max_nb_chars=50)

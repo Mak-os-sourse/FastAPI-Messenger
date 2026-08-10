@@ -5,11 +5,12 @@ from app.models.messege import Messege
 
 
 class MessegeCrud(BaseCRUD[Messege]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(Messege)
-    
+
     async def add(
-        self, session: AsyncSession,
+        self,
+        session: AsyncSession,
         chat_id: int,
         user_id: int,
         content: str,
@@ -20,5 +21,6 @@ class MessegeCrud(BaseCRUD[Messege]):
             user_id=user_id,
             content=content,
         )
+
 
 messege_crud = MessegeCrud()

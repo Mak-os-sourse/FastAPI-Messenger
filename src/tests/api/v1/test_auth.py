@@ -11,227 +11,262 @@ from tests.fake import fake
 async def test_update_token(client: AsyncClient):
     user = await UserFactory.create()
     access, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
-    
+
     res = await client.post(
         "auth/update-token",
         headers={"Authorization": f"Bearer {access}"},
         cookies={"token": refresh},
     )
-    
+
     result = res.json()
-    
+
     assert res.status_code == 200
     assert result["access_token"]
     assert res.cookies.get("token")
+
 
 async def test_update_token_fail_blacklist(redis: Redis, client: AsyncClient):
     user = await UserFactory.create()
     access, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
     access_key = f"{settings.redis.namespace}:token-blacklist:{access}:access"
     await redis.set(access_key, 1)
-    
+
     res = await client.post(
         "auth/update-token",
         headers={"Authorization": f"Bearer {access}"},
         cookies={"token": refresh},
     )
-    
+
     assert res.status_code == 401
+
 
 async def test_update_token_error_token(client: AsyncClient):
     user = await UserFactory.create()
     _, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
-    
+
     res = await client.post(
         "auth/update-token",
         headers={"Authorization": "Bearer w5a234fa"},
         cookies={"token": refresh},
     )
-    
+
     assert res.status_code == 401
+
 
 async def test_regist_user_error_user_is_exists(client: AsyncClient):
     user = await UserFactory.create()
     username = user.username
-    res = await client.post("auth/regist", json={
-        "username": username,
-        "name": fake.name(),
-        "email": fake.email(),
-        "description": fake.text(50),
-        "password": fake.password(),
-    })
-    
+    res = await client.post(
+        "auth/regist",
+        json={
+            "username": username,
+            "name": fake.name(),
+            "email": fake.email(),
+            "description": fake.text(50),
+            "password": fake.password(),
+        },
+    )
+
     assert res.status_code == 409
+
 
 async def test_regist_user(client: AsyncClient):
     username, password = fake.user_name(), fake.password()
-    res = await client.post("auth/regist", json={
-        "username": username,
-        "name": fake.name(),
-        "email": fake.email(),
-        "description": fake.text(50),
-        "password": password,
-    })
-    
+    res = await client.post(
+        "auth/regist",
+        json={
+            "username": username,
+            "name": fake.name(),
+            "email": fake.email(),
+            "description": fake.text(50),
+            "password": password,
+        },
+    )
+
     result = res.json()
-    
+
     assert res.status_code == 200
     assert result["access_token"]
     assert res.cookies.get("token")
+
 
 async def test_login_user_disable_2fa(client: AsyncClient):
     password = fake.password()
     username = fake.user_name()
-    
-    await UserFactory(type_2fa=None, username=username, password=hash_lib.hash(password))
-    
-    res = await client.post("auth/login", json={
-        "username": username,
-        "password": password,
-    })
-    
+
+    await UserFactory.create(type_2fa=None, username=username, password=hash_lib.hash(password))
+
+    res = await client.post(
+        "auth/login",
+        json={
+            "username": username,
+            "password": password,
+        },
+    )
+
     result = res.json()
-    
+
     assert res.status_code == 200
     assert result["access_token"]
     assert res.cookies.get("token")
 
+
 async def test_login_user_enable_2fa(client: AsyncClient):
     password = fake.password()
     username = fake.user_name()
-    
-    user = await UserFactory(type_2fa="email", username=username, password=hash_lib.hash(password))
-    
-    res = await client.post("auth/login", json={
-        "username": username,
-        "password": password,
-    })
-    
+
+    user = await UserFactory.create(
+        type_2fa="email",
+        username=username,
+        password=hash_lib.hash(password),
+    )
+
+    res = await client.post(
+        "auth/login",
+        json={
+            "username": username,
+            "password": password,
+        },
+    )
+
     result = res.json()
-    
+
     assert res.status_code == 200
     assert result["user_id"] == user.id
     assert result["access_token"] is None
     assert result["type_2fa"] is not None
 
+
 async def test_login_user_error_user_not_found(client: AsyncClient):
-    res = await client.post("auth/login", json={
-        "username": fake.user_name(),
-        "password": fake.password(),
-    })
-    
+    res = await client.post(
+        "auth/login",
+        json={
+            "username": fake.user_name(),
+            "password": fake.password(),
+        },
+    )
+
     assert res.status_code == 401
+
 
 async def test_login_user_error_fail_password(client: AsyncClient):
     password = fake.password()
     username = fake.user_name()
-    
-    user = await UserFactory(type_2fa="email", username=username, password=hash_lib.hash(password))
-    
-    res = await client.post("auth/login", json={
-        "username": user.username,
-        "password": fake.password(),
-    })
-    
+
+    user = await UserFactory.create(
+        type_2fa="email",
+        username=username,
+        password=hash_lib.hash(password),
+    )
+
+    res = await client.post(
+        "auth/login",
+        json={
+            "username": user.username,
+            "password": fake.password(),
+        },
+    )
+
     assert res.status_code == 401
+
 
 async def test_verify_gen_code(redis: Redis, client: AsyncClient):
     user = await UserFactory.create()
-    
-    res = await client.post("auth/verify-code/gen", params={
-        "user_id": user.id,
-    })
+
+    res = await client.post(
+        "auth/verify-code/gen",
+        params={
+            "user_id": user.id,
+        },
+    )
 
     result = res.json()
 
     assert res.status_code == 200
     assert result["send_code"]
     assert await redis.keys()
-    
+
+
 async def test_verify_code(redis: Redis, client: AsyncClient):
     user = await UserFactory.create()
-    
+
     code = 357_659
     key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
     await redis.set(key, code)
-    
+
     res = await client.post(
         "auth/verify-code/verify",
         json={"code": code},
-        params={"user_id": user.id}
+        params={"user_id": user.id},
     )
 
     result = res.json()
-    
+
     assert res.status_code == 200
     assert result["access_token"]
     assert res.cookies.get("token")
-    
+
+
 async def test_verify_code_error_invalid_code(redis: Redis, client: AsyncClient):
     user = await UserFactory.create()
-    
+
     code = 357_659
     key = f"{settings.redis.namespace}:verify-code:user:{user.id}:id"
     await redis.set(key, code)
-    
+
     res = await client.post(
         "auth/verify-code/verify",
         json={"code": 412_657},
-        params={"user_id": user.id}
+        params={"user_id": user.id},
     )
-    
+
     assert res.status_code == 401
 
+
 async def test_gen_qecode(client: AsyncClient):
-    user = await UserFactory(secret_key=totp.gen_secret_key())
-    
-    res = await client.post(
-        "auth/opt/gen-qrcode",
-        params={"user_id": user.id}
-    )
-    
+    user = await UserFactory.create(secret_key=totp.gen_secret_key())
+
+    res = await client.post("auth/opt/gen-qrcode", params={"user_id": user.id})
+
     assert res.status_code == 200
     assert res.content
+
 
 async def test_gen_qecode_error_not_enable_2fa(client: AsyncClient):
     user = await UserFactory.create()
-    
-    res = await client.post(
-        "auth/opt/gen-qrcode",
-        params={"user_id": user.id}
-    )
-    
+
+    res = await client.post("auth/opt/gen-qrcode", params={"user_id": user.id})
+
     assert res.status_code == 409
     assert res.content
 
-async def test_verify_otp(client: AsyncClient):
-    user = await UserFactory(secret_key=totp.gen_secret_key())
+
+async def test_verify_otp(client: AsyncClient, auth_user):
+    user = await UserFactory.create(secret_key=totp.gen_secret_key())
     code = pyotp.TOTP(user.secret_key).now()
-    
-    res = await client.post(
-        "auth/otp/verify",
-        json={"code": code},
-        params={"user_id": user.id}
-    )
-    
+    auth_user(user)
+
+    res = await client.post("auth/otp/verify", json={"code": code}, params={"user_id": user.id})
+
     result = res.json()
-    
+
     assert res.status_code == 200
     assert result["access_token"]
     assert res.cookies.get("token")
+
 
 async def test_logout(redis: Redis, client: AsyncClient):
     user = await UserFactory.create()
     access, refresh = token.create_tokens(id=user.id, username=user.username, email=user.email)
-    
+
     res = await client.post(
         "auth/logout",
         headers={"Authorization": f"Bearer {access}"},
         cookies={"token": refresh},
     )
-    
+
     result = res.json()
-    
+
     assert res.status_code == 200
     assert result["success"]
     assert not res.cookies.get("token")

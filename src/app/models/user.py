@@ -9,7 +9,7 @@ from app.core.base import Base
 
 class User(Base):
     __tablename__ = "Users"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(unique=True)
     name: Mapped[str] = mapped_column()
@@ -18,5 +18,7 @@ class User(Base):
     description: Mapped[str] = mapped_column(String(length=50))
     secret_key: Mapped[str] = mapped_column(nullable=True)
     type_2fa: Mapped[Literal["email", "totp"]] = mapped_column(nullable=True)
-    type_status: Mapped[Literal["online", "offline", "not-disturb"]] = mapped_column(default="online")
+    type_status: Mapped[Literal["online", "offline", "not-disturb"]] = mapped_column(
+        default="online",
+    )
     create_at: Mapped[int] = mapped_column(default=lambda: int(time.time()))

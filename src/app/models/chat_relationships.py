@@ -6,11 +6,11 @@ from app.core.base import Base
 
 class ChatRelationships(Base):
     __tablename__ = "ChatRelationships"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     chat_id: Mapped[int] = mapped_column(ForeignKey("ChatGroups.id", ondelete="CASCADE"))
     user_id: Mapped[int] = mapped_column(ForeignKey("Users.id"))
     is_admin: Mapped[bool] = mapped_column(default=False)
-    
-    user: Mapped["User"] = relationship(lazy="joined")
-    chat: Mapped["ChatGroup"] = relationship(lazy="joined")
+
+    user: Mapped["User"] = relationship(lazy="joined")  # type: ignore[name-defined]
+    chat: Mapped["ChatGroup"] = relationship(lazy="joined")  # type: ignore[name-defined]

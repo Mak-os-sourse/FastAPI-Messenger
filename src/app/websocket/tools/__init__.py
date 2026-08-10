@@ -17,5 +17,5 @@ __all__ = [
     "WebSocketNotificationResponse",
     "WebSocketRequest",
     "WebSocketResponse",
-    "manager"
+    "manager",
 ]

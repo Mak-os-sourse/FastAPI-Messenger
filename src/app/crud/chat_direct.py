@@ -6,17 +6,27 @@ from app.models.chat_direct import ChatDirect
 
 
 class ChatDirectCrud(BaseCRUD[ChatDirect]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(ChatDirect)
-        
+
     async def add(self, session: AsyncSession, user_id_one: int, user_id_two: int) -> ChatDirect:
         return await super().add(session, user_id_one=user_id_one, user_id_two=user_id_two)
-    
-    async def add_if_not_exists(self, session: AsyncSession, user_id_one: int, user_id_two: int) -> ChatDirect:
-        stmt = insert(self.model).values(user_id_one=user_id_one, user_id_two=user_id_two).returning(self.model)
-        stmt.on_conflict_do_nothing(index_elements=["user_id_one", "user_id_two"])
+
+    async def add_if_not_exists(
+        self,
+        session: AsyncSession,
+        user_id_one: int,
+        user_id_two: int,
+    ) -> ChatDirect | None:
+        stmt = (
+            insert(self.model)
+            .values(user_id_one=user_id_one, user_id_two=user_id_two)
+            .on_conflict_do_nothing(constraint="unique_user_ids")
+            .returning(self.model)
+        )
         data = await session.scalars(stmt)
         await session.flush()
         return data.one_or_none()
+
 
 chat_direct_crud = ChatDirectCrud()

@@ -8,5 +8,6 @@ class WSDependsParams:
     func: Callable[..., Any]
     use_cache: bool
 
-def WSDpends(func: Callable[..., Any], use_cache: bool = True):
+
+def WSDpends(func: Callable[..., Any], use_cache: bool = True) -> Any:
     return WSDependsParams(func=func, use_cache=use_cache)

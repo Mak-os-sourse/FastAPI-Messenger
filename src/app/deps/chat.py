@@ -15,11 +15,13 @@ async def get_chat_admin(
     session: AsyncSession = Depends(db.get_session),
 ) -> ChatRelationships | None:
     chat = await chat_relationships_crud.get_one(
-        session, chat_id=chat_id,
-        user_id=user.id, is_admin=True
+        session,
+        chat_id=chat_id,
+        user_id=user.id,
+        is_admin=True,
     )
-    
+
     if chat is None:
         raise UserNotAdminInChat()
-    
+
     return chat

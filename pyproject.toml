@@ -26,7 +26,6 @@ dependencies = [
     "python-multipart>=0.0.32",
     "qrcode>=8.2",
     "redis>=8.0.0",
-    "ruff>=0.16.0",
     "sqlalchemy>=2.0.50",
     "taskiq-redis>=1.2.3",
     "types-aioboto3[essential]>=15.5.0",
@@ -37,12 +36,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "ruff>=0.16.0",
     "factory-boy>=3.3.3",
     "faker>=40.21.0",
     "mypy>=2.1.0",
     "pytest>=9.0.3",
     "pytest-asyncio>=1.4.0",
     "pytest-env>=1.6.0",
+    "pre-commit>=4.6.1",
 ]
 
 [tool.setuptools.packages.find]
@@ -62,9 +63,8 @@ mypy_path = "src"
 strict = true
 pretty = true
 
-check_untyped_defs = false
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
+disable_error_code = ["override"]
+
 disallow_untyped_calls = false
 
 ignore_missing_imports = true
@@ -72,4 +72,28 @@ explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = "tests.*"
-no_implicit_reexport = false
+ignore_errors = true
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",
+    "SIM",
+    "RUF",
+]
+ignore = [
+    "E501", "F405", "F403", "B008", "F821"
+]
+
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"

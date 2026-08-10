@@ -12,6 +12,7 @@ class User(BaseModel):
     password: str = Field(min_length=6, max_length=60)
     create_at: int
 
+
 class UserResponse(BaseModel):
     id: int
     username: str
@@ -20,10 +21,12 @@ class UserResponse(BaseModel):
     description: str
     create_at: int
 
+
 class UpdateData(BaseModel):
     name: str | None = Field(default=None, min_length=4, max_length=30)
     description: str | None = Field(default=None, max_length=50)
     type_status: Literal["online", "offline", "not-disturb"] | None = None
+
 
 class Enable2FA(BaseModel):
     type: Literal["email", "totp"]

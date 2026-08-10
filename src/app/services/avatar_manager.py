@@ -6,29 +6,24 @@ from app.tasks.file import save_convert
 
 
 class AvatarManager:
-    async def save(
-        self, 
-        id: int | str, 
-        bucket: str,
-        file: bytes, 
-        input_format: str
-    ) -> None:
+    async def save(self, id: int | str, bucket: str, file: bytes, input_format: str) -> None:
         format = settings.file.base_image_format
         buff = base64.b64encode(file).decode()
-        
+
         await save_convert.kiq(
             file=buff,
             bucket=bucket,
             key=f"avatar-{id}.{input_format}",
-            new_key=f"avatar-{id}.{format}"
+            new_key=f"avatar-{id}.{format}",
         )
-    
-    async def get(self, storage: S3Storage, id: int | str):
+
+    async def get(self, storage: S3Storage, id: int | str) -> bytes:
         format = settings.file.base_image_format
         image = await storage.get(
             bucket=settings.s3.user_bucket,
             key=f"avatar-{id}.{format}",
         )
         return image
+
 
 avatar_manager = AvatarManager()

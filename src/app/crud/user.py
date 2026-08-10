@@ -5,9 +5,9 @@ from app.models.user import User
 
 
 class UserCrud(BaseCRUD[User]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(User)
-        
+
     async def add(
         self,
         session: AsyncSession,
@@ -16,7 +16,7 @@ class UserCrud(BaseCRUD[User]):
         password: str,
         email: str,
         description: str,
-        ) -> User:
+    ) -> User:
         return await super().add(
             session,
             username=username,
@@ -25,5 +25,6 @@ class UserCrud(BaseCRUD[User]):
             email=email,
             description=description,
         )
+
 
 user_crud = UserCrud()

@@ -15,15 +15,15 @@ async def save_convert(
     key: str,
     new_key: str,
     storage: S3Storage = TaskiqDepends(get_storage),
-):
-    format_file = key.split(".")[-1]
+) -> None:
+    format_file = key.rsplit(".", maxsplit=1)[-1]
     format = getattr(FormatFile, format_file, None)
     if format is None:
         raise UnsupportedMediaFormat()
-    
+
     file_data = base64.b64decode(file.encode())
-    
+
     data = await ffmpeg_tools.convert(file=file_data, output_format=format)
-    
+
     await storage.upload(bucket=bucket, key=new_key, file=data)
     await storage.delete(bucket=bucket, key=key)

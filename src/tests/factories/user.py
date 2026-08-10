@@ -7,7 +7,7 @@ from tests.factories.base import BaseFactory
 class UserFactory(BaseFactory):
     class Meta:
         model = User
-        
+
     username = Faker("name")
     name = Faker("name")
     password = Faker("password")

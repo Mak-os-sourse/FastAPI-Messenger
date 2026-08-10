@@ -11,5 +11,4 @@ async def get_user(user_id: int = Query(), session: AsyncSession = Depends(db.ge
     user = await user_crud.get_one(session, id=user_id)
     if user is not None:
         return user
-    else:
-        raise UserNotFoud()
+    raise UserNotFoud()

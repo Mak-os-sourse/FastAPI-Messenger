@@ -17,6 +17,7 @@ class ChatCrud(BaseCRUD[ChatGroup]):
         name: str | None = None,
         description: str | None = None,
         admin_only: bool = False,
+        image: str | None = None,
     ) -> ChatGroup:
         return await super().add(
             session,
@@ -24,6 +25,7 @@ class ChatCrud(BaseCRUD[ChatGroup]):
             name=name,
             description=description,
             admin_only=admin_only,
+            image=image,
         )
 
 

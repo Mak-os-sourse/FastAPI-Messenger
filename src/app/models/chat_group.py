@@ -15,4 +15,5 @@ class ChatGroup(Base):
     name: Mapped[str] = mapped_column(String(length=30), nullable=True)
     description: Mapped[str] = mapped_column(String(length=50), nullable=True)
     admin_only: Mapped[bool] = mapped_column()
+    image: Mapped[str] = mapped_column(nullable=True)
     create_at: Mapped[int] = mapped_column(default=lambda: int(time.time()))

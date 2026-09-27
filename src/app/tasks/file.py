@@ -11,9 +11,9 @@ from app.services.ffmpeg_tools import FormatFile, ffmpeg_tools
 @broker.task
 async def save_convert(
     file: str,
-    bucket: str,
     key: str,
     new_key: str,
+    bucket: str,
     storage: S3Storage = TaskiqDepends(get_storage),
 ) -> None:
     format_file = key.rsplit(".", maxsplit=1)[-1]
@@ -26,4 +26,3 @@ async def save_convert(
     data = await ffmpeg_tools.convert(file=file_data, output_format=format)
 
     await storage.upload(bucket=bucket, key=new_key, file=data)
-    await storage.delete(bucket=bucket, key=key)

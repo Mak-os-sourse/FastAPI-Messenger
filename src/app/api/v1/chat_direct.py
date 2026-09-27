@@ -19,7 +19,7 @@ from app.schemas.chat_direct import (
 )
 from app.services.notification_messeges import notification_messeges
 
-router = APIRouter(prefix="/chat/direct")
+router = APIRouter(prefix="/chat/direct", tags=["Chat-direct"])
 
 
 @router.post("/create", response_model=ChatDirectResponse)

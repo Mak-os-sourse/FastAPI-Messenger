@@ -1,6 +1,5 @@
 import base64
 
-from app.aws import S3Storage
 from app.core.settings import settings
 from app.tasks.file import save_convert
 
@@ -12,18 +11,17 @@ class AvatarManager:
 
         await save_convert.kiq(
             file=buff,
-            bucket=bucket,
             key=f"avatar-{id}.{input_format}",
             new_key=f"avatar-{id}.{format}",
+            bucket=bucket,
         )
 
-    async def get(self, storage: S3Storage, id: int | str) -> bytes:
+    def get_url_file(self, id: int, bucket: str) -> str:
         format = settings.file.base_image_format
-        image = await storage.get(
-            bucket=settings.s3.user_bucket,
-            key=f"avatar-{id}.{format}",
-        )
-        return image
+        url_s3 = settings.s3.url
+        if url_s3[-1] != "/":
+            url_s3 += "/"
+        return f"{url_s3}{bucket}/avatar-{id}.{format}"
 
 
 avatar_manager = AvatarManager()

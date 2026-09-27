@@ -15,10 +15,11 @@ class User(Base):
     name: Mapped[str] = mapped_column()
     password: Mapped[str] = mapped_column()
     email: Mapped[str] = mapped_column()
-    description: Mapped[str] = mapped_column(String(length=50))
+    description: Mapped[str] = mapped_column(String(length=50), nullable=True)
     secret_key: Mapped[str] = mapped_column(nullable=True)
     type_2fa: Mapped[Literal["email", "totp"]] = mapped_column(nullable=True)
     type_status: Mapped[Literal["online", "offline", "not-disturb"]] = mapped_column(
         default="online",
     )
+    image: Mapped[str] = mapped_column(nullable=True)
     create_at: Mapped[int] = mapped_column(default=lambda: int(time.time()))

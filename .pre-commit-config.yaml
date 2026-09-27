@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.2
+    rev: v0.16.9
     hooks:
      - id: ruff
        name: Ruff Linter
@@ -10,11 +10,13 @@ repos:
        name: Ruff Formatter
        language: system
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v2.3.0'
+    rev: 'v2.3.1'
     hooks:
       - id: mypy 
+        args: ["src"]
         name: Mypy Linter
         language: system
+        pass_filenames: false
   - repo: local
     hooks:
     - id: pytest

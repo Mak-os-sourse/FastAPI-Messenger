@@ -48,27 +48,6 @@ async def test_delete_user(client: AsyncClient, auth_user):
     assert result["success"]
 
 
-async def test_user_avatar_get(client: AsyncClient, storage: S3Storage):
-    format = settings.file.base_image_format
-    user = await UserFactory.create()
-
-    await storage.upload(
-        file="src/tests/test.jpeg",
-        bucket=settings.s3.user_bucket,
-        key=f"avatar-{user.id}.{format}",
-    )
-
-    res = await client.get(
-        "user/avatar/get",
-        params={
-            "id": user.id,
-        },
-    )
-
-    assert res.status_code == 200
-    assert res.content
-
-
 async def test_user_update_avatar(client: AsyncClient, storage: S3Storage, auth_user):
     format = settings.file.base_image_format
     user = await UserFactory.create()
@@ -81,6 +60,7 @@ async def test_user_update_avatar(client: AsyncClient, storage: S3Storage, auth_
     content = await storage.get(bucket=settings.s3.user_bucket, key=f"avatar-{user.id}.{format}")
 
     assert res.status_code == 200
+    assert user.image is not None
     assert result["success"]
     assert content
 

@@ -61,27 +61,6 @@ async def test_update_chat_group_error_not_admin(client: AsyncClient, auth_user)
     assert res.status_code == 403
 
 
-async def test_chat_avatar_get(client: AsyncClient, storage: S3Storage):
-    format = settings.file.base_image_format
-    user = await UserFactory.create()
-
-    await storage.upload(
-        file="src/tests/test.jpeg",
-        bucket=settings.s3.user_bucket,
-        key=f"avatar-{user.id}.{format}",
-    )
-
-    res = await client.get(
-        "/chat/group/avatar/get",
-        params={
-            "id": user.id,
-        },
-    )
-
-    assert res.status_code == 200
-    assert res.content
-
-
 async def test_chat_update_avatar(client: AsyncClient, storage: S3Storage, auth_user):
     format = settings.file.base_image_format
     chat = await ChatRelationshipsFactory.create(is_admin=True)
@@ -101,6 +80,7 @@ async def test_chat_update_avatar(client: AsyncClient, storage: S3Storage, auth_
     )
 
     assert res.status_code == 200
+    assert chat.chat.image is not None
     assert result["success"]
     assert content
 

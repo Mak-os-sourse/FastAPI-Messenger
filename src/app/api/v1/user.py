@@ -1,9 +1,8 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Body, Depends, Query, Response, UploadFile
+from fastapi import APIRouter, Body, Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.aws import S3Storage, get_storage
 from app.core.db import db
 from app.core.settings import settings
 from app.crud.user import user_crud
@@ -18,7 +17,7 @@ from app.schemas.user import (
 )
 from app.services.avatar_manager import avatar_manager
 
-router = APIRouter(prefix="/user")
+router = APIRouter(prefix="/user", tags=["User"])
 
 
 @router.get("/me", response_model=UserResponse)
@@ -46,20 +45,11 @@ async def delete_user(
     return Success(success=True)
 
 
-@router.get("/avatar/get")
-async def get_avatar(
-    id: str = Query(),
-    storage: S3Storage = Depends(get_storage),
-) -> Response:
-    format = settings.file.base_image_format
-    image = await avatar_manager.get(storage, id=id)
-    return Response(image, media_type=f"image/{format}")
-
-
 @router.put("/avatar/update", response_model=Success)
 async def update_avatar(
     user: User = Depends(auth_user),
     image: UploadFile = Depends(get_image),
+    session: AsyncSession = Depends(db.get_session),
 ) -> Success:
     suffix = Path(image.filename or "base.png").suffix
     await avatar_manager.save(
@@ -67,6 +57,11 @@ async def update_avatar(
         bucket=settings.s3.user_bucket,
         file=(await image.read()),
         input_format=suffix,
+    )
+    await user_crud.update(
+        session,
+        user.id,
+        image=avatar_manager.get_url_file(id=user.id, bucket=settings.s3.user_bucket),
     )
     return Success(success=True)
 

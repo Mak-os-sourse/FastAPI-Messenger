@@ -15,7 +15,8 @@ class UserCrud(BaseCRUD[User]):
         name: str,
         password: str,
         email: str,
-        description: str,
+        description: str | None = None,
+        image: str | None = None,
     ) -> User:
         return await super().add(
             session,
@@ -24,6 +25,7 @@ class UserCrud(BaseCRUD[User]):
             password=password,
             email=email,
             description=description,
+            image=image,
         )
 
 

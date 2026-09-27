@@ -31,7 +31,7 @@ from app.schemas.auth import (
 from app.schemas.base import Success
 from app.services.security import black_list, hash_lib, token, totp
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/auth", tags=["User"])
 
 
 @router.post("/update-token", response_model=JwtToken)

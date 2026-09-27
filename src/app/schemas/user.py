@@ -8,7 +8,7 @@ class User(BaseModel):
     username: str = Field(min_length=4, max_length=30)
     name: str = Field(min_length=4, max_length=30)
     email: EmailStr
-    description: str = Field(max_length=50)
+    description: str | None = Field(max_length=50)
     password: str = Field(min_length=6, max_length=60)
     create_at: int
 

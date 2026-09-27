@@ -1,10 +1,9 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Body, Depends, Query, Response, UploadFile
+from fastapi import APIRouter, Body, Depends, UploadFile
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.aws import S3Storage, get_storage
 from app.core.cache import cache
 from app.core.db import db
 from app.core.settings import settings
@@ -27,7 +26,7 @@ from app.schemas.chat_group import (
 from app.services.avatar_manager import avatar_manager
 from app.services.notification_messeges import notification_messeges
 
-router = APIRouter(prefix="/chat/group")
+router = APIRouter(prefix="/chat/group", tags=["Chat-group"])
 
 
 @router.post("/create", response_model=ChatGroupResponse)
@@ -54,20 +53,11 @@ async def update_chat(
     return ChatGroupResponse(**result.model_dump())
 
 
-@router.get("/avatar/get")
-async def get_avatar(
-    id: str = Query(),
-    storage: S3Storage = Depends(get_storage),
-) -> Response:
-    format = settings.file.base_image_format
-    image = await avatar_manager.get(storage, id=id)
-    return Response(image, media_type=f"image/{format}")
-
-
 @router.put("/avatar/update", response_model=Success)
 async def update_avatar(
     chat: ChatRelationships = Depends(get_chat_admin),
     image: UploadFile = Depends(get_image),
+    session: AsyncSession = Depends(db.get_session),
 ) -> Success:
     suffix = Path(image.filename or "base.png").suffix
     await avatar_manager.save(
@@ -75,6 +65,11 @@ async def update_avatar(
         bucket=settings.s3.chat_bucket,
         file=(await image.read()),
         input_format=suffix,
+    )
+    await chat_group_crud.update(
+        session,
+        chat.id,
+        image=avatar_manager.get_url_file(id=chat.id, bucket=settings.s3.chat_bucket),
     )
     return Success(success=True)
 

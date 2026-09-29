@@ -24,7 +24,6 @@ from app.schemas.chat_group import (
     UpdateChat,
 )
 from app.services.avatar_manager import avatar_manager
-from app.services.notification_messeges import notification_messeges
 
 router = APIRouter(prefix="/chat/group", tags=["Chat-group"])
 
@@ -38,7 +37,6 @@ async def creat_chat(
 ) -> ChatGroupResponse:
     chat = await chat_group_crud.add(session, **create_chat.model_dump())
     await chat_relationships_crud.add(session, chat_id=chat.id, user_id=user.id, is_admin=True)
-    await notification_messeges.subscribe(redis, user_id=user.id, channel_ids=[chat.id])
     return ChatGroupResponse(**chat.model_dump())
 
 
@@ -80,7 +78,6 @@ async def delete_chat(
     session: AsyncSession = Depends(db.get_session),
 ) -> Success:
     await chat_group_crud.delete(session, id=chat.id)
-    await notification_messeges.unsubscribe_all(channel_ids=[chat.chat_id])
     return Success(success=True)
 
 
@@ -125,7 +122,6 @@ async def accept_join(
         user_id=invitation.user_id,
         is_admin=accept_join.is_admin,
     )
-    await notification_messeges.subscribe(redis, user_id=chat.user_id, channel_ids=[chat.chat_id])
     return Success(success=True)
 
 
@@ -146,5 +142,4 @@ async def leave(
     session: AsyncSession = Depends(db.get_session),
 ) -> Success:
     await chat_relationships_crud.leave(session, chat_id=chat_id, user_id=user.id)
-    await notification_messeges.unsubscribe(user_id=user.id, channel_ids=[chat_id])
     return Success(success=True)

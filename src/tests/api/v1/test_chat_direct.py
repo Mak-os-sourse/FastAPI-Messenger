@@ -1,4 +1,5 @@
 from httpx import AsyncClient
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.chat_direct import ChatDirect
@@ -6,7 +7,7 @@ from tests.factories.chat_direct import ChatDirectFactory
 from tests.factories.user import UserFactory
 
 
-async def test_create_chat_direct(client: AsyncClient, auth_user):
+async def test_create_chat_direct(client: AsyncClient, redis: Redis, auth_user):
     user = await UserFactory.create()
     companion = await UserFactory.create()
     auth_user(user)
@@ -23,6 +24,7 @@ async def test_create_chat_direct(client: AsyncClient, auth_user):
     assert res.status_code == 200
     assert result["user_id_one"] == user.id
     assert result["user_id_two"] == companion.id
+    assert await redis.keys()
 
 
 async def test_delete_chat_direct(session: AsyncSession, client: AsyncClient, auth_user):
@@ -34,7 +36,6 @@ async def test_delete_chat_direct(session: AsyncSession, client: AsyncClient, au
 
     result = res.json()
     data = await session.get(ChatDirect, chat.id)
-    print(result)
 
     assert res.status_code == 200
     assert result["success"]

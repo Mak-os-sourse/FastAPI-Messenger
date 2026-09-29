@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import cache
 from app.core.db import db
+from app.crud.cache_crud import cache_crud
 from app.crud.chat_direct import chat_direct_crud
 from app.crud.user import user_crud
 from app.deps.auth import auth_user
@@ -17,7 +18,6 @@ from app.schemas.chat_direct import (
     ChatDirectResponse,
     CreateDirectChat,
 )
-from app.services.notification_messeges import notification_messeges
 
 router = APIRouter(prefix="/chat/direct", tags=["Chat-direct"])
 
@@ -41,7 +41,13 @@ async def create_chat(
     )
     if chat is None:
         raise ChatAlredyCreated()
-    await notification_messeges.subscribe(redis, user_id=user.id, channel_ids=[chat.id])
+    await cache_crud.add(
+        redis,
+        f"""chat-relationships:{chat.id}:chat_id
+            :{user.id}:user_id_one
+            :{create_chat_model.companion_id}:user_id_two""",
+        chat.model_dump(),
+    )
     return ChatDirectResponse(**chat.model_dump())
 
 
@@ -61,5 +67,4 @@ async def delete_chat(
             ),
         ],
     )
-    await notification_messeges.unsubscribe_all(channel_ids=[chat_id])
     return Success(success=True)

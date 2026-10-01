@@ -1,10 +1,8 @@
 from pathlib import Path
 
 from fastapi import APIRouter, Body, Depends, UploadFile
-from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.cache import cache
 from app.core.db import db
 from app.core.settings import settings
 from app.crud.chat_group import chat_group_crud
@@ -32,7 +30,6 @@ router = APIRouter(prefix="/chat/group", tags=["Chat-group"])
 async def creat_chat(
     user: User = Depends(auth_user),
     create_chat: CreateGroupChat = Body(),
-    redis: Redis = Depends(cache.get_redis),
     session: AsyncSession = Depends(db.get_session),
 ) -> ChatGroupResponse:
     chat = await chat_group_crud.add(session, **create_chat.model_dump())
@@ -42,42 +39,42 @@ async def creat_chat(
 
 @router.put("/update", response_model=ChatGroupResponse)
 async def update_chat(
-    chat: ChatRelationships = Depends(get_chat_admin),
+    relation: ChatRelationships = Depends(get_chat_admin),
     update_chat: UpdateChat = Body(),
     session: AsyncSession = Depends(db.get_session),
 ) -> ChatGroupResponse:
     data = update_chat.model_dump(exclude_none=True)
-    result = await chat_group_crud.update(session, id=chat.id, **data)
+    result = await chat_group_crud.update(session, id=relation.id, **data)
     return ChatGroupResponse(**result.model_dump())
+
+
+@router.delete("/delete", response_model=Success)
+async def delete_chat(
+    relation: ChatRelationships = Depends(get_chat_admin),
+    session: AsyncSession = Depends(db.get_session),
+) -> Success:
+    await chat_group_crud.delete(session, id=relation.id)
+    return Success(success=True)
 
 
 @router.put("/avatar/update", response_model=Success)
 async def update_avatar(
-    chat: ChatRelationships = Depends(get_chat_admin),
+    relation: ChatRelationships = Depends(get_chat_admin),
     image: UploadFile = Depends(get_image),
     session: AsyncSession = Depends(db.get_session),
 ) -> Success:
     suffix = Path(image.filename or "base.png").suffix
     await avatar_manager.save(
-        id=chat.chat_id,
+        id=relation.chat_id,
         bucket=settings.s3.chat_bucket,
         file=(await image.read()),
         input_format=suffix,
     )
     await chat_group_crud.update(
         session,
-        chat.id,
-        image=avatar_manager.get_url_file(id=chat.id, bucket=settings.s3.chat_bucket),
+        relation.id,
+        image=avatar_manager.get_url_file(id=relation.id, bucket=settings.s3.chat_bucket),
     )
-    return Success(success=True)
-
-
-@router.delete("/delete", response_model=Success)
-async def delete_chat(
-    chat: ChatRelationships = Depends(get_chat_admin),
-    session: AsyncSession = Depends(db.get_session),
-) -> Success:
-    await chat_group_crud.delete(session, id=chat.id)
     return Success(success=True)
 
 
@@ -108,7 +105,6 @@ async def join_user(
 async def accept_join(
     chat: ChatRelationships = Depends(get_chat_admin),
     accept_join: AcceptJoin = Body(),
-    redis: Redis = Depends(cache.get_redis),
     session: AsyncSession = Depends(db.get_session),
 ) -> Success:
     invitation = await invitation_crud.get_one(session, id=accept_join.invitation_id)

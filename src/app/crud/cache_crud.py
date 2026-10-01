@@ -20,5 +20,10 @@ class CacheCrud:
     async def delete(self, redis: Redis, key: str) -> None:
         await redis.delete(key)
 
+    async def pattern_delete(self, redis: Redis, match: str, cursor: int = 0) -> None:
+        data = await redis.scan(match=match)
+        for key in data[1]:
+            await redis.delete(key)
+
 
 cache_crud = CacheCrud()

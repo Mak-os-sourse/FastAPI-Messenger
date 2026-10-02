@@ -1,29 +1,54 @@
 import json
-from typing import Any, cast
+from collections.abc import Sequence
+from typing import Any
 
 from redis.asyncio import Redis
 
 
 class CacheCrud:
-    async def add(
-        self, redis: Redis, key: str, data: dict[Any, Any], ex: int | None = None
-    ) -> None:
-        await redis.set(key, json.dumps(data), ex=ex)
+    def __init__(self, prefix: str, keys: Sequence[str] | None = None):
+        self.prefix = prefix
+        self.keys = keys
 
-    async def get(self, redis: Redis, key: str) -> dict[Any, Any] | None:
-        data = await redis.get(key)
+    async def add(self, redis: Redis, data: dict[Any, Any], ex: int | None = None) -> None:
+        await redis.set(self._get_key(data), json.dumps(data), ex=ex)
+
+    async def get(self, redis: Redis, **kargs: Any) -> dict[Any, Any] | None:
+        data = await self.get_all(redis, **kargs)
+        if data:
+            return data[0]
+        return None
+
+    async def get_all(self, redis: Redis, **kargs: Any) -> list[dict[Any, Any]]:
+        result = []
+        keys = await redis.scan(match=self._get_match(kargs))
         try:
-            return cast(dict[Any, Any] | None, json.loads(str(data)))
+            for key in keys[1]:
+                item = await redis.get(key)
+                result.append(json.loads(str(item)))
         except json.JSONDecodeError:
-            return None
+            return []
+        return result
 
-    async def delete(self, redis: Redis, key: str) -> None:
-        await redis.delete(key)
+    async def delete(self, redis: Redis, **kargs: Any) -> None:
+        keys = self._get_match(kargs)
+        for key in keys:
+            await redis.delete(key)
 
     async def pattern_delete(self, redis: Redis, match: str, cursor: int = 0) -> None:
-        data = await redis.scan(match=match)
+        data = await redis.scan(cursor, match=match)
         for key in data[1]:
             await redis.delete(key)
 
+    def _get_key(self, data: dict[Any, Any]) -> str:
+        result = self.prefix
+        items = self.keys if self.keys else data.keys()
+        for key in items:
+            result += f":{data[key]}:{key}"
+        return result
 
-cache_crud = CacheCrud()
+    def _get_match(self, data: dict[Any, Any]) -> str:
+        match = f"{self.prefix}*{id}:id"
+        for key, value in data.items():
+            match += f"*{value}:{key}*"
+        return match

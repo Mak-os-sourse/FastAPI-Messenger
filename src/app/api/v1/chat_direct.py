@@ -1,11 +1,8 @@
 from fastapi import APIRouter, Body, Depends, Query
-from redis.asyncio import Redis
 from sqlalchemy import or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.cache import cache
 from app.core.db import db
-from app.crud.cache_crud import cache_crud
 from app.crud.chat_direct import chat_direct_crud
 from app.crud.user import user_crud
 from app.deps.auth import auth_user
@@ -25,7 +22,6 @@ router = APIRouter(prefix="/chat/direct", tags=["Chat-direct"])
 @router.post("/create", response_model=ChatDirectResponse)
 async def create_chat(
     user: User = Depends(auth_user),
-    redis: Redis = Depends(cache.get_redis),
     create_chat_model: CreateDirectChat = Body(),
     session: AsyncSession = Depends(db.get_session),
 ) -> ChatDirectResponse:
@@ -41,15 +37,6 @@ async def create_chat(
     )
     if chat is None:
         raise ChatAlredyCreated()
-    await cache_crud.add(
-        redis,
-        (
-            f"chat-relationships:{chat.id}:chat_id"
-            f":{user.id}:user_id_one"
-            f":{create_chat_model.companion_id}:user_id_two"
-        ),
-        chat.model_dump(),
-    )
     return ChatDirectResponse(**chat.model_dump())
 
 
@@ -57,7 +44,6 @@ async def create_chat(
 async def delete_chat(
     user: User = Depends(auth_user),
     chat_id: int = Query(embed=True),
-    redis: Redis = Depends(cache.get_redis),
     session: AsyncSession = Depends(db.get_session),
 ) -> Success:
     await chat_direct_crud.delete(
@@ -69,8 +55,5 @@ async def delete_chat(
                 ChatDirect.user_id_two == user.id,
             ),
         ],
-    )
-    await cache_crud.pattern_delete(
-        redis, f"chat-relationships:{chat_id}:chat_id:{user.id}:user_id*"
     )
     return Success(success=True)

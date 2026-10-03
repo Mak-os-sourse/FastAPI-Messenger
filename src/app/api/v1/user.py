@@ -1,10 +1,9 @@
 from pathlib import Path
 
 from fastapi import APIRouter, Body, Depends, UploadFile
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import db
 from app.core.settings import settings
+from app.crud.object import ObjectSession
 from app.crud.user import user_crud
 from app.deps.auth import auth_user
 from app.deps.file import get_image
@@ -29,7 +28,7 @@ async def get_me(user: User = Depends(auth_user)) -> UserResponse:
 async def update_data(
     user: User = Depends(auth_user),
     update_data: UpdateData = Body(),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
 ) -> UserResponse:
     data = update_data.model_dump(exclude_none=True)
     user = await user_crud.update(session, id=user.id, **data)
@@ -39,7 +38,7 @@ async def update_data(
 @router.delete("/delete", response_model=Success)
 async def delete_user(
     user: User = Depends(auth_user),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
 ) -> Success:
     await user_crud.delete(session, id=user.id)
     return Success(success=True)
@@ -49,7 +48,7 @@ async def delete_user(
 async def update_avatar(
     user: User = Depends(auth_user),
     image: UploadFile = Depends(get_image),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
 ) -> Success:
     suffix = Path(image.filename or "base.png").suffix
     await avatar_manager.save(
@@ -70,7 +69,7 @@ async def update_avatar(
 async def enable_2fa(
     enable_2fa: Enable2FA = Body(),
     user: User = Depends(auth_user),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
 ) -> Success:
     await user_crud.update(session, id=user.id, type_2fa=enable_2fa.type)
     return Success(success=True)
@@ -79,7 +78,7 @@ async def enable_2fa(
 @router.post("/2fa/disable", response_model=Success)
 async def disable_2fa(
     user: User = Depends(auth_user),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
 ) -> Success:
     await user_crud.update(session, id=user.id, type_2fa=None)
     return Success(success=True)

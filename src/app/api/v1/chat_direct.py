@@ -1,14 +1,11 @@
 from fastapi import APIRouter, Body, Depends, Query
-from sqlalchemy import or_
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import db
 from app.crud.chat_direct import chat_direct_crud
+from app.crud.object import ObjectSession
 from app.crud.user import user_crud
 from app.deps.auth import auth_user
 from app.exc.chat import ChatAlredyCreated
 from app.exc.user import UserNotFoud
-from app.models.chat_direct import ChatDirect
 from app.models.user import User
 from app.schemas.base import Success
 from app.schemas.chat_direct import (
@@ -23,15 +20,15 @@ router = APIRouter(prefix="/chat/direct", tags=["Chat-direct"])
 async def create_chat(
     user: User = Depends(auth_user),
     create_chat_model: CreateDirectChat = Body(),
-    session: AsyncSession = Depends(db.get_session),
+    object_session: ObjectSession = Depends(),
 ) -> ChatDirectResponse:
-    companion = await user_crud.get_one(session, id=create_chat_model.companion_id)
+    companion = await user_crud.get_one(object_session, id=create_chat_model.companion_id)
 
     if companion is None:
         raise UserNotFoud()
 
     chat = await chat_direct_crud.add_if_not_exists(
-        session,
+        object_session,
         user_id_one=user.id,
         user_id_two=create_chat_model.companion_id,
     )
@@ -44,16 +41,7 @@ async def create_chat(
 async def delete_chat(
     user: User = Depends(auth_user),
     chat_id: int = Query(embed=True),
-    session: AsyncSession = Depends(db.get_session),
+    object_session: ObjectSession = Depends(),
 ) -> Success:
-    await chat_direct_crud.delete(
-        session,
-        id=chat_id,
-        whereclause=[
-            or_(
-                ChatDirect.user_id_one == user.id,
-                ChatDirect.user_id_two == user.id,
-            ),
-        ],
-    )
+    await chat_direct_crud.delete_by_user_id(object_session, id=chat_id, user_id=user.id)
     return Success(success=True)

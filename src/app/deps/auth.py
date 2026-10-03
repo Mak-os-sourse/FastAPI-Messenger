@@ -1,9 +1,8 @@
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import PyJWTError
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import db
+from app.crud.object import ObjectSession
 from app.crud.user import user_crud
 from app.exc.auth import InvalidToken, WSInvalidToken
 from app.models.user import User
@@ -16,7 +15,7 @@ security = HTTPBearer()
 
 async def ws_auth_user(
     ws_token: WSToken,
-    session: AsyncSession = WSDpends(db.get_session),
+    session: ObjectSession = WSDpends(ObjectSession),
 ) -> User | None:
     try:
         data = token.decode(ws_token.token)
@@ -29,7 +28,7 @@ async def ws_auth_user(
 
 
 async def auth_user(
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> User | None:
     try:

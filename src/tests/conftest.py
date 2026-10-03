@@ -6,11 +6,13 @@ from httpx import ASGITransport, AsyncClient
 from httpx_ws import AsyncWebSocketSession, aconnect_ws
 from httpx_ws.transport import ASGIWebSocketTransport
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.aws import S3Storage, get_storage, s3
 from app.core.cache import cache
 from app.core.db import db
 from app.core.settings import settings
+from app.crud.object import ObjectSession
 from app.deps.auth import auth_user as auth_user_deps
 from app.deps.auth import ws_auth_user
 from app.main import app
@@ -44,6 +46,11 @@ async def session():
         _session_manager.session = session
         yield session
         await session.rollback()
+
+
+@pytest_asyncio.fixture()
+async def object_session(session: AsyncSession, redis: Redis):
+    return ObjectSession(session, redis)
 
 
 @pytest_asyncio.fixture()

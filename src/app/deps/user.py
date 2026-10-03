@@ -1,13 +1,12 @@
 from fastapi import Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import db
+from app.crud.object import ObjectSession
 from app.crud.user import user_crud
 from app.exc.user import UserNotFoud
 from app.models.user import User
 
 
-async def get_user(user_id: int = Query(), session: AsyncSession = Depends(db.get_session)) -> User:
+async def get_user(user_id: int = Query(), session: ObjectSession = Depends()) -> User:
     user = await user_crud.get_one(session, id=user_id)
     if user is not None:
         return user

@@ -35,8 +35,8 @@ class CacheCrud:
         for key in keys:
             await redis.delete(key)
 
-    async def pattern_delete(self, redis: Redis, match: str, cursor: int = 0) -> None:
-        data = await redis.scan(cursor, match=match)
+    async def pattern_delete(self, redis: Redis, cursor: int = 0, **kargs: Any) -> None:
+        data = await redis.scan(cursor, match=self._get_match(kargs))
         for key in data[1]:
             await redis.delete(key)
 
@@ -48,7 +48,7 @@ class CacheCrud:
         return result
 
     def _get_match(self, data: dict[Any, Any]) -> str:
-        match = f"{self.prefix}*{id}:id"
+        match = f"{self.prefix}"
         for key, value in data.items():
             match += f"*{value}:{key}*"
         return match

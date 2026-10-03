@@ -13,6 +13,6 @@ class ChatRelationshipsFactory(BaseFactory):
     user = SubFactory(UserFactory)
     chat = SubFactory(ChatGroupFactory)
 
-    user_id = LazyAttribute(lambda m: m.user.id)
-    chat_id = LazyAttribute(lambda m: m.chat.id)
+    user_id: int = LazyAttribute(lambda m: m.user.id)
+    chat_id: int = LazyAttribute(lambda m: m.chat.id)
     is_admin: bool

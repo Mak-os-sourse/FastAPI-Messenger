@@ -3,11 +3,10 @@ from fastapi.security import HTTPAuthorizationCredentials
 from jwt import PyJWTError
 from numpy import random
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import cache
-from app.core.db import db
 from app.core.settings import settings
+from app.crud.object import ObjectSession
 from app.crud.user import user_crud
 from app.deps.auth import security
 from app.deps.user import get_user
@@ -39,7 +38,7 @@ async def update_token(
     response: Response,
     refresh: str = Cookie(alias="token"),
     redis: Redis = Depends(cache.get_redis),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
     access: HTTPAuthorizationCredentials = Depends(security),
 ) -> JwtToken:
     try:
@@ -80,7 +79,7 @@ async def update_token(
 async def regist_user(
     response: Response,
     user_data: CreateUser = Body(),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
 ) -> JwtToken:
     user = await user_crud.get_one(session, username=user_data.username)
     if user is not None:
@@ -107,7 +106,7 @@ async def regist_user(
 async def login_user(
     response: Response,
     user_data: LoginUser = Body(),
-    session: AsyncSession = Depends(db.get_session),
+    session: ObjectSession = Depends(),
 ) -> LoginUserResponse:
     user = await user_crud.get_one(session, username=user_data.username)
     if user is None:
